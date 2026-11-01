@@ -1,6 +1,6 @@
 # Credits
 
-This project exists because of the original authors and contributors below, including RexShack and the Rexshack-RedM project, Phil Mcracken, RMS, Mack, RINGO, the QBCore team and Kakarot, ESX, Overextended, AvarianKnight, Xogy, zfbx, Viyu88 and the wider community. They keep their copyright, and this fork isn't affiliated with or endorsed by them.
+This project exists because of the original authors and contributors below, including RexShack and the Rexshack-RedM project, Phil Mcracken, RMS, Mack, RINGO, the QBCore team and Kakarot, ESX, Overextended, AvarianKnight, Xogy, zfbx, Viyu88 and the wider community. They keep their copyright. RINGO maintains this fork, which isn't affiliated with or endorsed by the other authors.
 
 The sections below are carried over from each resource's original documentation and manifest. Each resource folder has the same text in its own CREDITS.md. Sources and licenses are in [NOTICE.md](NOTICE.md).
 
