@@ -22,7 +22,7 @@ Copy the `resources` folder from this repository into your server data folder.
 
 Then install these two required downloads. They aren't bundled because their repositories have no license:
 
-1. Download [citizenfx/cfx-server-data](https://github.com/citizenfx/cfx-server-data) and copy its `resources` folder contents into a `resources/[cfx-default]` folder.
+1. Download [this exact commit of citizenfx/cfx-server-data](https://github.com/citizenfx/cfx-server-data/tree/e265cb251c88260533c847d4a1a2838c7d828a66) and copy its `resources` folder contents into a `resources/[cfx-default]` folder. Later commits no longer include `chat`, `hardcap` or `sessionmanager-rdr3`.
 2. Download [kibook/weathersync](https://github.com/kibook/weathersync) into `resources/[standalone]/weathersync`. `rsg-multicharacter`, `rsg-spawn`, `rsg-appearance`, `rsg-horses` and `rsg-essentials` call it directly, so character selection and spawning will fail without it.
 
 ## 2. Create the database

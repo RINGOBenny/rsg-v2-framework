@@ -10,7 +10,6 @@ set sv_enforceGameBuild 1491
 
 sv_licenseKey "CHANGE_ME"
 set mysql_connection_string "mysql://CHANGE_ME_USER:CHANGE_ME_PASSWORD@localhost/CHANGE_ME_DATABASE?charset=utf8mb4"
-set steam_webApiKey ""
 set sv_enforceSteamAuth false
 
 sv_hostname "CHANGE_ME"
@@ -28,10 +27,12 @@ setr voice_use3dAudio true
 setr voice_defaultVoiceMode 2
 setr voice_enableUi 1
 
-# mapmanager and spawnmanager come from cfx-server-data (see docs/INSTALL.md). chat is built into FXServer.
+# Base resources from cfx-server-data (see docs/INSTALL.md)
 ensure mapmanager
-ensure spawnmanager
 ensure chat
+ensure spawnmanager
+ensure sessionmanager-rdr3
+ensure hardcap
 
 # Framework. ox_lib must start before rsg-core.
 ensure oxmysql

@@ -24,7 +24,7 @@ Every resource has its own release with its own zip, named `<resource>-v<version
 
 Install these yourself, or use your own replacements:
 
-- **Required, base server resources:** `mapmanager` and `spawnmanager` come from [citizenfx/cfx-server-data](https://github.com/citizenfx/cfx-server-data). `chat` is built into FXServer.
+- **Required, base server resources:** `mapmanager`, `spawnmanager`, `chat`, `hardcap` and `sessionmanager-rdr3` come from [citizenfx/cfx-server-data](https://github.com/citizenfx/cfx-server-data/tree/e265cb251c88260533c847d4a1a2838c7d828a66). Use this exact commit, because later ones no longer include them.
 - **Required, weather:** [kibook/weathersync](https://github.com/kibook/weathersync). Character selection and spawning need it.
 - **Optional, HUD:** this build has no HUD because the version it was based on has no license. See [docs/RESOURCES.md](docs/RESOURCES.md).
 
