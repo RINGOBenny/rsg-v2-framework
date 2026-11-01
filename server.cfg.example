@@ -28,7 +28,7 @@ setr voice_use3dAudio true
 setr voice_defaultVoiceMode 2
 setr voice_enableUi 1
 
-# Base resources from citizenfx/cfx-server-data (see docs/INSTALL.md)
+# mapmanager and spawnmanager come from cfx-server-data (see docs/INSTALL.md). chat is built into FXServer.
 ensure mapmanager
 ensure spawnmanager
 ensure chat

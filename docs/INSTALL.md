@@ -1,5 +1,15 @@
 # Installing RSG v2 Framework
 
+The easiest way to install is the txAdmin recipe. On txAdmin's setup page, choose **Remote URL Template** and paste:
+
+```
+https://raw.githubusercontent.com/RINGOBenny/rsg-v2-framework/main/recipe/rsg-v2.yaml
+```
+
+It does steps 1 to 3 below for you. Afterwards, add your license identifier to `server.cfg` if you want owner access, and see step 4 for optional resources.
+
+The rest of this guide is for installing by hand.
+
 ## Requirements
 
 - FXServer for RedM, on a build with Node 22 support (needed by `oxmysql` 2.14.1)

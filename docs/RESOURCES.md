@@ -78,4 +78,4 @@ These have no license that allows redistribution, so they aren't bundled.
 | `rsg-hud` | Add your own HUD | Players have no on-screen HUD |
 | `rsg-fishmonger`, `rsg-looting` | Add your own if you want them | Those features are missing |
 | `menu_base`, `redm-female-fix` | Add your own if you want them | Nothing in this build calls them by name |
-| `chat-redm` | Replaced by `chat` from `cfx-server-data` | Not applicable |
+| `chat-redm` | Replaced by `chat`, which is built into FXServer | Not applicable |

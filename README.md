@@ -24,11 +24,23 @@ Every resource has its own release with its own zip, named `<resource>-v<version
 
 Install these yourself, or use your own replacements:
 
-- **Required, base server resources:** `mapmanager`, `spawnmanager` and `chat` come from [citizenfx/cfx-server-data](https://github.com/citizenfx/cfx-server-data).
+- **Required, base server resources:** `mapmanager` and `spawnmanager` come from [citizenfx/cfx-server-data](https://github.com/citizenfx/cfx-server-data). `chat` is built into FXServer.
 - **Required, weather:** [kibook/weathersync](https://github.com/kibook/weathersync). Character selection and spawning need it.
 - **Optional, HUD:** this build has no HUD because the version it was based on has no license. See [docs/RESOURCES.md](docs/RESOURCES.md).
 
 ## Getting started
+
+### With txAdmin
+
+On txAdmin's setup page, choose **Remote URL Template** and paste this URL:
+
+```
+https://raw.githubusercontent.com/RINGOBenny/rsg-v2-framework/main/recipe/rsg-v2.yaml
+```
+
+The recipe downloads everything, including the required extras, and sets up the database and `server.cfg`.
+
+### By hand
 
 Follow [docs/INSTALL.md](docs/INSTALL.md). In short:
 

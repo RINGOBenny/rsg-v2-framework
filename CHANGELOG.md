@@ -10,6 +10,7 @@ First release of this fork. These are the changes from the upstream code listed 
 - `server.cfg.example`, a server config written for this build
 - `rnotify-compat`, which shows `rNotify:NotifyLeft` events through `ox_lib` now that `rNotify` isn't included
 - `CREDITS.md`, in the repository root and in each resource
+- A txAdmin recipe in `recipe/`
 - Install and resource documentation
 - A GitHub Actions workflow that publishes one release per resource
 - `dependency 'ox_lib'` in the manifests of `rsg-bathing`, `rsg-canteen`, `rsg-inventory`, `rsg-multicharacter`, `rsg-multijob`, `rsg-npcs`, `rsg-wardrobe` and `rsg-discord`

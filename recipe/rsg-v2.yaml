@@ -1,0 +1,90 @@
+$engine: 3
+$onesync: on
+name: RSG v2 Framework
+version: 2.4.1-fork.1
+author: RINGO
+description: RSG Core 2.x RedM server base with ox_lib as a required dependency. Unofficial fork maintained by RINGO. Original work by RexShack, the Rexshack-RedM project and contributors; see CREDITS.md.
+
+tasks:
+  # Framework
+  - action: download_github
+    src: RINGOBenny/rsg-v2-framework
+    ref: main
+    dest: ./tmp/rsg-v2
+    timeoutSeconds: 600
+
+  - action: move_path
+    src: ./tmp/rsg-v2/resources
+    dest: ./resources
+
+  - action: move_path
+    src: ./tmp/rsg-v2/recipe/server.cfg
+    dest: ./server.cfg
+
+  # Required resources from their own projects
+  - action: download_github
+    src: citizenfx/cfx-server-data
+    ref: c6afa3909c763e3327ed76825e78453286c99f05
+    subpath: resources
+    dest: ./resources/[cfx-default]
+
+  - action: download_github
+    src: kibook/weathersync
+    ref: 9c8d3c49d8c0180a78c145d2a8e8ce73a1920bd0
+    dest: ./resources/[standalone]/weathersync
+
+  # Database
+  - action: connect_database
+
+  - action: query_database
+    file: ./tmp/rsg-v2/sql/core.sql
+
+  - action: query_database
+    file: ./resources/[framework]/rsg-adminmenu/install.sql
+
+  - action: query_database
+    file: ./resources/[framework]/rsg-ammo/rsg-ammo.sql
+
+  - action: query_database
+    file: ./resources/[framework]/rsg-animations/rsg-animations.sql
+
+  - action: query_database
+    file: ./resources/[framework]/rsg-gangmenu/rsg-gangmenu.sql
+
+  - action: query_database
+    file: ./resources/[framework]/rsg-goldclaim/install/rsg-goldclaim.sql
+
+  - action: query_database
+    file: ./resources/[framework]/rsg-horses/installation/setup.sql
+
+  - action: query_database
+    file: ./resources/[framework]/rsg-huntingpets/installation/rsg_huntingpets.sql
+
+  - action: query_database
+    file: ./resources/[framework]/rsg-lumberjack/install/database.sql
+
+  - action: query_database
+    file: ./resources/[framework]/rsg-mdt/sql/mdt.sql
+
+  - action: query_database
+    file: ./resources/[framework]/rsg-railroad/install/rsg_railroad_full.sql
+
+  - action: query_database
+    file: ./resources/[framework]/rsg-samples/install/rsg-samples.sql
+
+  - action: query_database
+    file: ./resources/[framework]/rsg-trapdoors/rsg_trapdoors.sql
+
+  - action: query_database
+    file: ./resources/[framework]/rsg-wagons/installation/rsg-wagons.sql
+
+  - action: query_database
+    file: ./resources/[framework]/rsg-weaponcomp/database.sql
+
+  # Fill in server.cfg and clean up
+  - action: replace_string
+    mode: all_vars
+    file: ./server.cfg
+
+  - action: remove_path
+    path: ./tmp

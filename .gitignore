@@ -1,5 +1,6 @@
 # Secrets and local server config
 server.cfg
+!recipe/server.cfg
 .env
 *.key
 *.pem
