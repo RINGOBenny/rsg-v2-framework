@@ -6,7 +6,7 @@ This is an **unofficial, independently maintained fork**. It keeps the 2.x line 
 
 ## Credits
 
-This framework is the work of RexShack and the Rexshack-RedM project, Phil Mcracken, RMS, Mack, the QBCore team and Kakarot, ESX, Overextended and many other contributors. Their copyright and credits are kept in full: see [CREDITS.md](CREDITS.md), and [NOTICE.md](NOTICE.md) for where each resource came from.
+This framework is the work of RexShack and the Rexshack-RedM project, Phil Mcracken, RMS, Mack, RINGO, the QBCore team and Kakarot, ESX, Overextended and many other contributors. Their copyright and credits are kept in full: see [CREDITS.md](CREDITS.md), and [NOTICE.md](NOTICE.md) for where each resource came from.
 
 ## What's included
 
