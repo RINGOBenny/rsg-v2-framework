@@ -20,10 +20,18 @@ The rest of this guide is for installing by hand.
 
 Copy the `resources` folder from this repository into your server data folder.
 
-Then install these two required downloads. They aren't bundled because their repositories have no license:
+Then install these downloads. They aren't bundled because their repositories have no license, so they come directly from their authors. Use these exact commits:
 
-1. Download [this exact commit of citizenfx/cfx-server-data](https://github.com/citizenfx/cfx-server-data/tree/e265cb251c88260533c847d4a1a2838c7d828a66) and copy its `resources` folder contents into a `resources/[cfx-default]` folder. Later commits no longer include `chat`, `hardcap` or `sessionmanager-rdr3`.
-2. Download [kibook/weathersync](https://github.com/kibook/weathersync) into `resources/[standalone]/weathersync`. `rsg-multicharacter`, `rsg-spawn`, `rsg-appearance`, `rsg-horses` and `rsg-essentials` call it directly, so character selection and spawning will fail without it.
+| Download | Put it in | Why it's needed |
+|---|---|---|
+| [citizenfx/cfx-server-data](https://github.com/citizenfx/cfx-server-data/tree/e265cb251c88260533c847d4a1a2838c7d828a66) | Copy the contents of its `resources` folder into `resources/[cfx-default]` | Base server resources. Later commits no longer include `chat`, `hardcap` or `sessionmanager-rdr3` |
+| [kibook/weathersync](https://github.com/kibook/weathersync/tree/9c8d3c49d8c0180a78c145d2a8e8ce73a1920bd0) | `resources/[standalone]/weathersync` | Character selection and spawning fail without it |
+| [rsg-hud](https://github.com/Rexshack-RedM/rsg-hud/tree/7bcf5afd5568c5529c90ca91a3a94b4181dc40df) | `resources/[framework]/rsg-hud` | The on-screen HUD. It also runs hunger, thirst, cleanliness and stress, so eating, drinking and washing break without it |
+| [rsg-fishmonger](https://github.com/Rexshack-RedM/rsg-fishmonger/tree/6f55d7955aa26e9db83cc545f72437ec5ac014a6) | `resources/[framework]/rsg-fishmonger` | Selling fish |
+| [rsg-looting](https://github.com/Rexshack-RedM/rsg-looting/tree/be25d38b4c78dcb737c7569896421839337920cc) | `resources/[framework]/rsg-looting` | Looting bodies |
+| [redm-female-fix](https://github.com/Popisek/redm-female-fix/tree/1cff9742a7130154c242b232f18ec7c0fd5b821b) | `resources/[standalone]/redm-female-fix` | Fixes invisible holes on female characters |
+
+Remove the folder name's commit suffix after unzipping, so the folder names match the table. To stop `rsg-hud`, `rsg-fishmonger` and `rsg-looting` reporting v3 as an update, empty their `server/versionchecker.lua` files.
 
 ## 2. Create the database
 

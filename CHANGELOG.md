@@ -30,4 +30,4 @@ First release of this fork. These are the changes from the upstream code listed 
 - `redm-ipls`, `redm-ymaps`, `Nt_Blackjack` and `Nt_Holdem`, because this build contains RSG resources and what they need only
 - `ox_doorlock` and `progressbar`, which no RSG resource uses
 
-`weathersync` is now a required separate download from `kibook/weathersync`.
+`weathersync`, `rsg-hud`, `rsg-fishmonger`, `rsg-looting` and `redm-female-fix` are separate downloads from their authors. The txAdmin recipe installs them, with the version checks turned off in the three RSG ones.

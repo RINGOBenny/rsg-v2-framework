@@ -67,15 +67,23 @@ These 56 resources are included in this build. Sources and licenses are in [NOTI
 - `rnotify-compat` (written for this build)
 - `xsound`
 
-## Removed from this build
+## Downloaded separately
 
-These have no license that allows redistribution, so they aren't bundled.
+These have no license that allows redistribution, so they aren't in this repository. The txAdmin recipe downloads them from their authors, and [INSTALL.md](INSTALL.md) links them for installing by hand.
 
-| Was | What to do | Effect if you skip it |
-|---|---|---|
-| `weathersync` | **Required.** Install `kibook/weathersync` (see [INSTALL.md](INSTALL.md)) | Character selection and spawning fail, because several resources call its exports |
-| `rNotify` | Nothing. `rnotify-compat` handles `rsg-multijob`'s notifications | `rsg-inventory` also mentions `rNotify`, and this build hasn't confirmed those messages are covered |
-| `rsg-hud` | Add your own HUD | Players have no on-screen HUD |
-| `rsg-fishmonger`, `rsg-looting` | Add your own if you want them | Those features are missing |
-| `menu_base`, `redm-female-fix` | Add your own if you want them | Nothing in this build calls them by name |
-| `chat-redm` | Replaced by `chat` from `cfx-server-data` | Not applicable |
+| Resource | Effect if it's missing |
+|---|---|
+| `mapmanager`, `spawnmanager`, `chat`, `hardcap`, `sessionmanager-rdr3` | The server can't run properly |
+| `weathersync` | Character selection and spawning fail, because several resources call its exports |
+| `rsg-hud` | No on-screen HUD, and hunger, thirst, cleanliness and stress don't work |
+| `rsg-fishmonger` | Players can't sell fish |
+| `rsg-looting` | Players can't loot bodies |
+| `redm-female-fix` | Female characters can show invisible holes |
+
+## Not used
+
+| Was | Why |
+|---|---|
+| `rNotify` | `rnotify-compat` handles `rsg-multijob`'s notifications |
+| `menu_base` | Replaced by `rsg-menubase`. Nothing in this build calls it |
+| `chat-redm` | Replaced by `chat` from `cfx-server-data` |

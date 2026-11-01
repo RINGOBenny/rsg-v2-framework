@@ -46,6 +46,8 @@ ensure ox_target
 ensure [standalone]
 ensure [framework]
 
+exec resources/[standalone]/weathersync/permissions.cfg
+
 # Permissions
 add_ace group.admin command allow
 add_ace resource.rsg-core command allow

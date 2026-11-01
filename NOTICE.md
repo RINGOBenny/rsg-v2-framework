@@ -65,3 +65,16 @@ Every resource comes from the source and commit shown. Changes made in this fork
 | `xsound` | `Xogy/xsound` | `7b345f8` | MIT |
 
 `rnotify-compat`, `sql/core.sql`, `server.cfg.example` and the documentation were written for this fork.
+
+## Separate downloads
+
+These aren't part of this repository, and no license is granted for them here. The txAdmin recipe downloads them directly from their authors, and they remain their authors' work.
+
+| Resource | Source on GitHub | Commit |
+|---|---|---|
+| `chat`, `hardcap`, `mapmanager`, `sessionmanager-rdr3`, `spawnmanager` | `citizenfx/cfx-server-data` | `e265cb2` |
+| `redm-female-fix` | `Popisek/redm-female-fix` | `1cff974` |
+| `rsg-fishmonger` | `Rexshack-RedM/rsg-fishmonger` | `6f55d79` |
+| `rsg-hud` | `Rexshack-RedM/rsg-hud` | `7bcf5af` |
+| `rsg-looting` | `Rexshack-RedM/rsg-looting` | `be25d38` |
+| `weathersync` | `kibook/weathersync` | `9c8d3c4` |

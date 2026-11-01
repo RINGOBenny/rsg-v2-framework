@@ -20,13 +20,15 @@ The full list is in [docs/RESOURCES.md](docs/RESOURCES.md).
 
 Every resource has its own release with its own zip, named `<resource>-v<version>`. See the repository's **Releases** page. A new release is created automatically when a resource's version in `fxmanifest.lua` changes.
 
-## Not included
+## Downloaded separately
 
-Install these yourself, or use your own replacements:
+These are part of the server, but their repositories have no license, so they can't be copied into this one. The txAdmin recipe downloads them from their authors at the right versions. If you install by hand, [docs/INSTALL.md](docs/INSTALL.md) links each one.
 
-- **Required, base server resources:** `mapmanager`, `spawnmanager`, `chat`, `hardcap` and `sessionmanager-rdr3` come from [citizenfx/cfx-server-data](https://github.com/citizenfx/cfx-server-data/tree/e265cb251c88260533c847d4a1a2838c7d828a66). Use this exact commit, because later ones no longer include them.
-- **Required, weather:** [kibook/weathersync](https://github.com/kibook/weathersync). Character selection and spawning need it.
-- **Optional, HUD:** this build has no HUD because the version it was based on has no license. See [docs/RESOURCES.md](docs/RESOURCES.md).
+- **Base server resources:** `mapmanager`, `spawnmanager`, `chat`, `hardcap` and `sessionmanager-rdr3` from `citizenfx/cfx-server-data`
+- **Weather:** `weathersync`
+- **HUD and player needs:** `rsg-hud`
+- **Fish selling and looting:** `rsg-fishmonger` and `rsg-looting`
+- **Female character fix:** `redm-female-fix`
 
 ## Getting started
 
@@ -38,7 +40,7 @@ On txAdmin's setup page, choose **Remote URL Template** and paste this URL:
 https://raw.githubusercontent.com/RINGOBenny/rsg-v2-framework/main/recipe/rsg-v2.yaml
 ```
 
-The recipe downloads everything, including the required extras, and sets up the database and `server.cfg`.
+The recipe downloads everything, including the separate downloads above, and sets up the database and `server.cfg`.
 
 ### By hand
 

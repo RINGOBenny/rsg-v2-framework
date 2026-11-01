@@ -34,6 +34,40 @@ tasks:
     ref: 9c8d3c49d8c0180a78c145d2a8e8ce73a1920bd0
     dest: ./resources/[standalone]/weathersync
 
+  - action: download_github
+    src: Popisek/redm-female-fix
+    ref: 1cff9742a7130154c242b232f18ec7c0fd5b821b
+    dest: ./resources/[standalone]/redm-female-fix
+
+  # Last 2.x versions, from their authors' repositories
+  - action: download_github
+    src: Rexshack-RedM/rsg-hud
+    ref: 7bcf5afd5568c5529c90ca91a3a94b4181dc40df
+    dest: ./resources/[framework]/rsg-hud
+
+  - action: download_github
+    src: Rexshack-RedM/rsg-fishmonger
+    ref: 6f55d7955aa26e9db83cc545f72437ec5ac014a6
+    dest: ./resources/[framework]/rsg-fishmonger
+
+  - action: download_github
+    src: Rexshack-RedM/rsg-looting
+    ref: be25d38b4c78dcb737c7569896421839337920cc
+    dest: ./resources/[framework]/rsg-looting
+
+  # These would otherwise report the v3 versions as an update
+  - action: write_file
+    file: ./resources/[framework]/rsg-hud/server/versionchecker.lua
+    data: "-- Disabled: this v2 build must not compare itself against the v3 versions on rsg-versioncheckers.\n"
+
+  - action: write_file
+    file: ./resources/[framework]/rsg-fishmonger/server/versionchecker.lua
+    data: "-- Disabled: this v2 build must not compare itself against the v3 versions on rsg-versioncheckers.\n"
+
+  - action: write_file
+    file: ./resources/[framework]/rsg-looting/server/versionchecker.lua
+    data: "-- Disabled: this v2 build must not compare itself against the v3 versions on rsg-versioncheckers.\n"
+
   # Database
   - action: connect_database
 
