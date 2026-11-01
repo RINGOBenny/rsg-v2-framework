@@ -9,6 +9,7 @@ First release of this fork. These are the changes from the upstream code listed 
 - `sql/core.sql`, a database schema written for this build
 - `server.cfg.example`, a server config written for this build
 - `rnotify-compat`, which shows `rNotify:NotifyLeft` events through `ox_lib` now that `rNotify` isn't included
+- `CREDITS.md`, in the repository root and in each resource
 - Install and resource documentation
 - A GitHub Actions workflow that publishes one release per resource
 - `dependency 'ox_lib'` in the manifests of `rsg-bathing`, `rsg-canteen`, `rsg-inventory`, `rsg-multicharacter`, `rsg-multijob`, `rsg-npcs`, `rsg-wardrobe` and `rsg-discord`
@@ -22,7 +23,7 @@ First release of this fork. These are the changes from the upstream code listed 
 ### Removed
 
 - All `versionchecker.lua` checks that compared against the upstream version list (each file is now a one-line stub)
-- Upstream READMEs and guides from the RSG resources
+- Upstream READMEs and guides from the RSG resources, with their credits and license notices kept in `CREDITS.md`
 - `rsg-hud`, `rsg-fishmonger`, `rsg-looting`, `menu_base`, `rNotify`, `chat-redm`, `weathersync` and `redm-female-fix`, because they have no license that allows redistribution
 - `cfx-server-data` resources, which are now installed from the official source
 - `redm-ipls`, `redm-ymaps`, `Nt_Blackjack` and `Nt_Holdem`, because this build contains RSG resources and what they need only

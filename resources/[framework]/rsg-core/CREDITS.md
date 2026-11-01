@@ -1,0 +1,25 @@
+# Credits for rsg-core
+
+This resource comes from the project and commit listed in the repository's NOTICE.md. Its original authors keep their copyright. The text below is carried over from the original project.
+
+Original project: https://github.com/Rexshack-RedM/rsg-core
+
+	Thanks to Kakarot and the QB Team for the original work https://discord.gg/qbcore
+
+# License
+
+    RSG RedM Framework
+    Copyright (C) 2015-2022 ESX (Jérémie N'gadi), Joshua Eger
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>

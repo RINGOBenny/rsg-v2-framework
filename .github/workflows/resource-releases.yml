@@ -38,12 +38,20 @@ jobs:
             fi
 
             tag="$name-v$version"
+            archive="$RUNNER_TEMP/$tag.zip"
             if gh release view "$tag" >/dev/null 2>&1; then
-              echo "$tag already released"
+              # A manual run refreshes the zip of an existing release
+              if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+                (cd "$(dirname "$dir")" && zip -qr "$archive" "$name")
+                gh release upload "$tag" "$archive" --clobber || failed=1
+                echo "Refreshed $tag"
+                sleep 2
+              else
+                echo "$tag already released"
+              fi
               continue
             fi
 
-            archive="$RUNNER_TEMP/$tag.zip"
             (cd "$(dirname "$dir")" && zip -qr "$archive" "$name")
 
             notes="$RUNNER_TEMP/$tag.md"
@@ -52,7 +60,7 @@ jobs:
               "" \
               "Unzip into your server's \`resources\` folder. Requires the framework's core resources; see docs/INSTALL.md." \
               "" \
-              "License and credits: see the LICENSE file in the archive and NOTICE.md." > "$notes"
+              "Original authors and license: see CREDITS.md and LICENSE in the archive." > "$notes"
 
             if gh release create "$tag" "$archive" --title "$name $version" --notes-file "$notes" --target "$GITHUB_SHA" --latest=false; then
               echo "Released $tag"

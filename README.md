@@ -2,7 +2,11 @@
 
 A complete RedM roleplay server base built on RSG Core 2.4.1, with [ox_lib](resources/[standalone]/ox_lib) as a required dependency.
 
-This is an **unofficial, independently maintained fork**. It keeps the 2.x line for servers that want to stay on ox_lib. It isn't affiliated with or endorsed by the original authors, so please don't ask them for support with this build. See [NOTICE.md](NOTICE.md) for where the code came from.
+This is an **unofficial, independently maintained fork**. It keeps the 2.x line for servers that want to stay on ox_lib. It isn't affiliated with or endorsed by the original authors, so please don't ask them for support with this build.
+
+## Credits
+
+This framework is the work of RexShack and the Rexshack-RedM project, Phil Mcracken, RMS, Mack, the QBCore team and Kakarot, ESX, Overextended and many other contributors. Their copyright and credits are kept in full: see [CREDITS.md](CREDITS.md), and [NOTICE.md](NOTICE.md) for where each resource came from.
 
 ## What's included
 

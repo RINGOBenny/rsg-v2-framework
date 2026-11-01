@@ -1,0 +1,11 @@
+# Credits for rsg-fishing
+
+This resource comes from the project and commit listed in the repository's NOTICE.md. Its original authors keep their copyright. The text below is carried over from the original project.
+
+Original project: https://github.com/Rexshack-RedM/rsg-fishing
+
+- Original source **FRP_Framework** → https://github.com/Faroeste-Roleplay/frp-lua-rdr3  
+- Additional edits/improvements from **VORP Core** → https://github.com/VORPCORE/vorp_fishing-lua  
+- RSG / Rexshack-RedM adaptation & maintenance  
+- Community contributors & translators  
+- License: GPL-3.0
