@@ -67,6 +67,10 @@ To give yourself owner access, uncomment the last line and add your license iden
 
 Start FXServer with your `server.cfg`. `ox_lib` must start before `rsg-core`, and the example config already does this.
 
+The first start takes about 2 minutes while `chat` and `sessionmanager-rdr3` build, and it can use a lot of CPU. You may see `Couldn't start resource`, `yarn` warnings and a brief `Server is not responding` during this. Wait for `Started resource chat` before judging the startup. Later starts skip the build.
+
+To join from another PC, use the server's public IP in RedM's F8 console, for example `connect 203.0.113.10:30120`. `localhost` only works on the server itself.
+
 ## Version checks
 
 The built-in RSG version checks are turned off in this build. They compared against a list that now reports v3 and would have told you to upgrade. `ox_lib` and `oxmysql` still check their own upstream versions and may report a newer release.
