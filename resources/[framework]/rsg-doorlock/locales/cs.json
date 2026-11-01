@@ -1,0 +1,7 @@
+{
+    "sv_nokey" : "Nemáte klíč!",
+    "cl_use_door" : "Použít",
+    "cl_door_status_base" : "Stav dveří: ",
+    "cl_door_status_lock" : "Zamčeno",
+    "cl_door_status_unlock" : "Odemčeno"
+}

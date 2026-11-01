@@ -1,0 +1,8 @@
+{
+    "sv_nokey" : "You do not have a key!",
+
+    "cl_use_door" : "Use",
+    "cl_door_status_base" : "Door Status: ",
+    "cl_door_status_lock" : "Locked",
+    "cl_door_status_unlock" : "Unlocked"
+}

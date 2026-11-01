@@ -1,0 +1,8 @@
+{
+    "sv_nokey" : "Δεν έχεις κλειδί!",
+
+    "cl_use_door" : "Χρήση",
+    "cl_door_status_base" : "Κατάσταση Πόρτας: ",
+    "cl_door_status_lock" : "Κλειδωμένη",
+    "cl_door_status_unlock" : "Ξεκλειδωμένη"
+}

@@ -1,0 +1,8 @@
+{
+    "sv_nokey" : "Non hai una chiave!",
+
+    "cl_use_door" : "Usa",
+    "cl_door_status_base" : "Stato Porta: ",
+    "cl_door_status_lock" : "Bloccata",
+    "cl_door_status_unlock" : "Sbloccata"
+}

@@ -1,0 +1,1403 @@
+const InventoryContainer = Vue.createApp({
+    data() {
+        return this.getInitialState();
+    },
+    computed: {
+        playerWeight() {
+            const weight = Object.values(this.playerInventory).reduce((total, item) => {
+                if (item && item.weight !== undefined && item.amount !== undefined) {
+                    return total + item.weight * item.amount;
+                }
+                return total;
+            }, 0);
+            return isNaN(weight) ? 0 : weight;
+        },
+        playerMoney() {
+            return this.cash * 100;
+        },
+        otherInventoryWeight() {
+            const weight = Object.values(this.otherInventory).reduce((total, item) => {
+                if (item && item.weight !== undefined && item.amount !== undefined) {
+                    return total + item.weight * item.amount;
+                }
+                return total;
+            }, 0);
+            return isNaN(weight) ? 0 : weight;
+        },
+        weightBarClass() {
+            const weightPercentage = (this.playerWeight / this.maxWeight) * 100;
+            if (weightPercentage < 50) {
+                return "low";
+            } else if (weightPercentage < 75) {
+                return "medium";
+            } else {
+                return "high";
+            }
+        },
+        otherWeightBarClass() {
+            const weightPercentage = (this.otherInventoryWeight / this.otherInventoryMaxWeight) * 100;
+            if (weightPercentage < 50) {
+                return "low";
+            } else if (weightPercentage < 75) {
+                return "medium";
+            } else {
+                return "high";
+            }
+        },
+        shouldCenterInventory() {
+            return this.isOtherInventoryEmpty && !this.isTradeActive;
+        },
+    },
+    watch: {
+        transferAmount(newVal) {
+            if (newVal !== null && newVal < 1) this.transferAmount = 1;
+        },
+    },
+    methods: {
+        getInitialState() {
+            return {
+
+                maxWeight: 0,
+                totalSlots: 0,
+
+                isInventoryOpen: false,
+                additionalCloseKey: 'KeyI',
+
+                isOtherInventoryEmpty: true,
+
+                errorSlot: null,
+
+                playerInventory: {},
+                inventoryLabel: "Satchel",
+                totalWeight: 0,
+
+                otherInventory: {},
+                otherInventoryName: "",
+                otherInventoryLabel: "Drop",
+                otherInventoryMaxWeight: 1000000,
+                otherInventorySlots: 100,
+                isShopInventory: false,
+
+                inventory: "",
+
+                showContextMenu: false,
+                contextMenuPosition: { top: "0px", left: "0px" },
+                contextMenuItem: null,
+                showSubmenu: false,
+
+                showHotbar: false,
+                hotbarItems: [],
+                wasHotbarEnabled: false,
+
+                showNotification: false,
+                notificationText: "",
+                notificationImage: "",
+                notificationType: "added",
+                notificationAmount: 1,
+                notificationDescription: "",
+                notificationTimeout: null,
+
+                requiredItems: [],
+
+                selectedWeapon: null,
+                showWeaponAttachments: false,
+                selectedWeaponAttachments: [],
+
+                selectedItem: null,
+                tooltipPosition: { topVh: 0, leftVw: 0 },
+
+                playerId: null,
+                playerName: null,
+
+                currentlyDraggingItem: null,
+                currentlyDraggingSlot: null,
+                dragStartX: 0,
+                dragStartY: 0,
+                ghostElement: null,
+                dragStartInventoryType: "player",
+                transferAmount: null,
+                busy: false,
+                dragThreshold: 5,
+                isMouseDown: false,
+                mouseDownX: 0,
+                mouseDownY: 0,
+                scrollBoundElements: [],
+                cash: 0,
+
+                // -------- Trade state --------
+                tradeId: null,
+                tradePartner: null,
+                tradePartnerName: null,
+                myTradeOffers: {},
+                theirTradeOffers: {},
+                myTradeAccepted: false,
+                theirTradeAccepted: false,
+                isTradeActive: false,
+                isTradeComplete: false,
+                // ----------------------------------------------
+
+                nuiToken: null,
+
+                // -------- Localisation UI (fallback EN) --------
+                t: {
+                    title: 'RSG Inventory',
+                    close: 'Close',
+                    close_aria: 'Close inventory',
+                    use: 'Use',
+                    give: 'Give',
+                    single: 'Single',
+                    half: 'Half',
+                    all: 'All',
+                    amount: 'Amount',
+                    amount_placeholder: 'amount',
+                    drop: 'Drop',
+                    copy_serial: 'Copy Serial',
+                    sell: 'Sell',
+                    satchel: 'Satchel',
+                    weight: 'Weight',
+                    id: 'ID',
+                    cash: 'Cash',
+                    received: 'Received',
+                    used: 'Used',
+                    removed: 'Removed',
+                    trade: 'Trade',
+                    your_offer: 'Your Offer',
+                    their_offer: 'Their Offer',
+                    accept: 'Accept',
+                    waiting: 'Waiting for other player...',
+                    cancel: 'Cancel',
+                    accepted: 'Accepted',
+                    no_items_offered: 'No items offered'
+                }
+                // ----------------------------------------------
+            };
+        },
+        validateToken(csrfToken) {
+            return axios
+                .post("https://rsg-core/validateCSRF", {
+                    clientToken: csrfToken,
+                })
+                .then((response) => {
+                    return response.data.valid;
+                })
+                .catch((error) => {
+                    console.error("Error validating CSRF:", error);
+                    return false;
+                });
+        },
+        openInventory(data) {
+            if (this.showHotbar) {
+                this.wasHotbarEnabled = true;
+                this.toggleHotbar(false);
+            } else {
+                this.wasHotbarEnabled = false;
+            }
+
+            this.isInventoryOpen = true;
+            this.maxWeight = data.maxweight;
+            this.totalSlots = data.slots;
+            this.playerId = data.playerId || null;
+            this.playerName = data.playerName || null;
+            this.playerInventory = {};
+            this.otherInventory = {};
+
+            // -------- Hydrating labels from Lua --------
+            if (data.labels) {
+                this.t = { ...this.t, ...data.labels };
+                // Mets à jour les intitulés visibles
+                this.inventoryLabel = this.t.satchel || this.inventoryLabel;
+            }
+            // ----------------------------------------------------
+
+            if (data.cash !== undefined) {
+                this.cash = data.cash;
+            }
+
+            if (data.inventory) {
+                if (Array.isArray(data.inventory)) {
+                    data.inventory.forEach((item) => {
+                        if (item && item.slot) {
+                            this.playerInventory[item.slot] = item;
+                        }
+                    });
+                } else if (typeof data.inventory === "object") {
+                    for (const key in data.inventory) {
+                        const item = data.inventory[key];
+                        if (item && item.slot) {
+                            this.playerInventory[item.slot] = item;
+                        }
+                    }
+                }
+            }
+
+            if (data.other) {
+                if (data.other && data.other.inventory) {
+                    if (Array.isArray(data.other.inventory)) {
+                        data.other.inventory.forEach((item) => {
+                            if (item && item.slot) {
+                                this.otherInventory[item.slot] = item;
+                            }
+                        });
+                    } else if (typeof data.other.inventory === "object") {
+                        for (const key in data.other.inventory) {
+                            const item = data.other.inventory[key];
+                            if (item && item.slot) {
+                                this.otherInventory[item.slot] = item;
+                            }
+                        }
+                    }
+                }
+
+                this.otherInventoryName = data.other.name;
+                // If an "other" label is provided, use it, otherwise fallback to t.drop (or the existing one)
+                this.otherInventoryLabel = data.other.label || this.t.drop || this.otherInventoryLabel;
+                this.otherInventoryMaxWeight = data.other.maxweight;
+                this.otherInventorySlots = data.other.slots;
+
+                if (this.otherInventoryName.startsWith("shop-")) {
+                    this.isShopInventory = true;
+                } else {
+                    this.isShopInventory = false;
+                }
+
+                this.isOtherInventoryEmpty = false;
+            }
+
+            // Tab title (if labels are provided)
+            if (this.t && this.t.title) {
+                document.title = this.t.title;
+            }
+
+            this.$nextTick(() => {
+                this.attachGridScrollListeners();
+            });
+        },
+        updateInventory(data) {
+            this.playerInventory = {};
+
+            if (data.inventory) {
+                if (Array.isArray(data.inventory)) {
+                    data.inventory.forEach((item) => {
+                        if (item && item.slot) {
+                            this.playerInventory[item.slot] = item;
+                        }
+                    });
+                } else if (typeof data.inventory === "object") {
+                    for (const key in data.inventory) {
+                        const item = data.inventory[key];
+                        if (item && item.slot) {
+                            this.playerInventory[item.slot] = item;
+                        }
+                    }
+                }
+            }
+        },
+        async closeInventory() {
+            let inventoryName = this.otherInventoryName;
+            const wasHotbarEnabled = this.wasHotbarEnabled;
+            const wasTradeActive = this.isTradeActive;
+            const currentTradeId = this.tradeId;
+            let hotbarItems = []
+            if (wasHotbarEnabled) {
+                hotbarItems = Array(5).fill(null).map((_, index) => {
+                    const item = this.playerInventory[index + 1];
+                    return item !== undefined ? item : null;
+                });
+            }
+
+            if (wasTradeActive && currentTradeId) {
+                axios.post("https://rsg-inventory/CancelTrade", { tradeId: currentTradeId }).catch(() => {});
+            }
+
+            Object.assign(this, this.getInitialState());
+            try {
+                await axios.post("https://rsg-inventory/CloseInventory", { name: inventoryName });
+                if (wasHotbarEnabled) {
+                    this.toggleHotbar({
+                        open: true,
+                        items: hotbarItems,
+                    });
+                }
+            } catch (error) {
+                console.error("Error closing inventory:", error);
+            }
+        },
+        toSlotMap(items) {
+            const map = {};
+            if (!items) return map;
+            for (const item of Object.values(items)) {
+                if (item && item.slot) map[item.slot] = item;
+            }
+            return map;
+        },
+        refreshInventories(data) {
+            this.playerInventory = this.toSlotMap(data.inventory);
+            if (data.otherInventory && this.otherInventoryName && !this.isShopInventory) {
+                this.otherInventory = this.toSlotMap(data.otherInventory);
+            }
+            this.busy = false;
+        },
+        clearTransferAmount() {
+            this.transferAmount = null;
+        },
+        getItemInSlot(slot, inventoryType) {
+            if (inventoryType === "player") {
+                return this.playerInventory[slot] || null;
+            } else if (inventoryType === "other") {
+                return this.otherInventory[slot] || null;
+            }
+            return null;
+        },
+        showItemInfo(item, evt) {
+            if (item) {
+                if (this.showContextMenu || this.currentlyDraggingItem || this.isMouseDown) return;
+                this.selectedItem = item;
+                if (evt && evt.clientX !== undefined) {
+                    const viewportW = window.innerWidth;
+                    const viewportH = window.innerHeight;
+                    const approxWidthPx = viewportW * 0.26;
+                    const approxHeightPx = viewportH * 0.24;
+                    const paddingPx = Math.max(viewportW, viewportH) * 0.006;
+                    let leftPx = evt.clientX + paddingPx;
+                    let topPx = evt.clientY - approxHeightPx / 2;
+
+                    if (leftPx + approxWidthPx > viewportW) {
+                        leftPx = viewportW - approxWidthPx - paddingPx;
+                    }
+                    if (topPx + approxHeightPx > viewportH) {
+                        topPx = viewportH - approxHeightPx - paddingPx;
+                    }
+                    if (topPx < 0) topPx = paddingPx;
+                    const leftVw = (leftPx / viewportW) * 100;
+                    const topVh = (topPx / viewportH) * 100;
+                    this.tooltipPosition = { topVh, leftVw };
+                }
+            }
+        },
+        hideItemInfo() {
+            this.selectedItem = null;
+        },
+        getHotbarItemInSlot(slot) {
+            return this.hotbarItems[slot - 1] || null;
+        },
+        containerMouseDownAction(event) {
+            if (event.button === 0) {
+                if (this.showContextMenu) {
+                    this.showContextMenu = false;
+                }
+                this.hideItemInfo();
+            }
+        },
+        handleMouseDown(event, slot, inventory) {
+            if (event.button === 1) return;
+            event.preventDefault();
+            const itemInSlot = this.getItemInSlot(slot, inventory);
+            if (event.button === 0) {
+                if (event.shiftKey && itemInSlot) {
+                    this.splitAndPlaceItem(itemInSlot, inventory);
+                } else {
+                    this.isMouseDown = true;
+                    this.mouseDownX = event.clientX;
+                    this.mouseDownY = event.clientY;
+                    this.currentlyDraggingSlot = slot;
+                    this.dragStartInventoryType = inventory;
+                }
+            } else if (event.button === 2 && itemInSlot) {
+                if (this.otherInventoryName.startsWith("shop-")) {
+                    this.handlePurchase(itemInSlot.slot, itemInSlot, 1, inventory);
+                    return;
+                }
+                if (!this.isOtherInventoryEmpty) {
+                    this.moveItemBetweenInventories(itemInSlot, inventory);
+                } else {
+                    this.showContextMenuOptions(event, itemInSlot);
+                }
+            }
+        },
+        moveItemBetweenInventories(item, sourceInventoryType) {
+            if (this.busy) {
+                return;
+            }
+
+            this.busy = true;
+            const sourceInventory = sourceInventoryType === "player" ? this.playerInventory : this.otherInventory;
+            const targetInventory = sourceInventoryType === "player" ? this.otherInventory : this.playerInventory;
+            const amountToTransfer = this.transferAmount !== null ? this.transferAmount : 1;
+            let targetSlot = null;
+
+            const sourceItem = sourceInventory[item.slot];
+            if (!sourceItem || sourceItem.amount < amountToTransfer) {
+                this.inventoryError(item.slot);
+                this.busy = false;
+                return;
+            }
+
+            const toPlayer = sourceInventoryType !== "player";
+            const totalWeightAfterTransfer = (toPlayer ? this.playerWeight : this.otherInventoryWeight) + sourceItem.weight * amountToTransfer;
+            if (totalWeightAfterTransfer > (toPlayer ? this.maxWeight : this.otherInventoryMaxWeight)) {
+                this.inventoryError(item.slot);
+                this.busy = false;
+                return;
+            }
+
+            const targetMaxSlots = targetInventory === this.playerInventory ? this.totalSlots : this.otherInventorySlots;
+
+            if (item.unique) {
+                targetSlot = this.findNextAvailableSlot(targetInventory, targetMaxSlots);
+                if (targetSlot === null) {
+                    this.inventoryError(item.slot);
+                    this.busy = false;
+                    return;
+                }
+
+                const newItem = {
+                    ...item,
+                    inventory: sourceInventoryType === "player" ? "other" : "player",
+                    amount: amountToTransfer,
+                };
+                targetInventory[targetSlot] = newItem;
+                newItem.slot = targetSlot;
+            } else {
+                const targetItemKey = Object.keys(
+                    targetInventory).find((key) => targetInventory[key] && targetInventory[key].name === item.name && targetInventory[key].info.quality === item.info.quality
+                );
+                const targetItem = targetInventory[targetItemKey];
+
+                if (!targetItem) {
+                    const newItem = {
+                        ...item,
+                        inventory: sourceInventoryType === "player" ? "other" : "player",
+                        amount: amountToTransfer,
+                    };
+
+                    targetSlot = this.findNextAvailableSlot(targetInventory, targetMaxSlots);
+                    if (targetSlot === null) {
+                        this.inventoryError(item.slot);
+                        this.busy = false;
+                        return;
+                    }
+
+                    targetInventory[targetSlot] = newItem;
+                    newItem.slot = targetSlot;
+                } else {
+                    targetItem.amount += amountToTransfer;
+                    targetSlot = targetItem.slot;
+                }
+            }
+
+            sourceItem.amount -= amountToTransfer;
+
+            if (sourceItem.amount <= 0) {
+                delete sourceInventory[item.slot];
+            }
+
+            this.postInventoryData(sourceInventoryType, sourceInventoryType === "player" ? "other" : "player", item.slot, targetSlot, sourceItem.amount, amountToTransfer);
+        },
+        startDrag(event, slot, inventoryType) {
+            event.preventDefault();
+            const item = this.getItemInSlot(slot, inventoryType);
+            if (!item) return;
+            const slotElement = event.target.closest(".item-slot");
+            if (!slotElement) return;
+            this.hideItemInfo();
+            this.dragStartInventoryType = inventoryType;
+            const ghostElement = this.createGhostElement(slotElement);
+            document.body.appendChild(ghostElement);
+            const offsetX = ghostElement.offsetWidth / 2;
+            const offsetY = ghostElement.offsetHeight / 2;
+            ghostElement.style.left = `${event.clientX - offsetX}px`;
+            ghostElement.style.top = `${event.clientY - offsetY}px`;
+            this.ghostElement = ghostElement;
+            this.currentlyDraggingItem = item;
+            this.currentlyDraggingSlot = slot;
+            this.dragStartX = event.clientX;
+            this.dragStartY = event.clientY;
+            this.showContextMenu = false;
+        },
+        createGhostElement(slotElement) {
+            const ghostElement = slotElement.cloneNode(true);
+            ghostElement.style.position = "absolute";
+            ghostElement.style.pointerEvents = "none";
+            ghostElement.style.opacity = "0.7";
+            ghostElement.style.zIndex = "1000";
+            ghostElement.style.width = getComputedStyle(slotElement).width;
+            ghostElement.style.height = getComputedStyle(slotElement).height;
+            ghostElement.style.boxSizing = "border-box";
+            const amountElement = ghostElement.querySelector(".item-slot-amount p");
+            if (amountElement) {
+                const isShop = this.otherInventoryName.indexOf("shop-") !== -1;
+                if (this.transferAmount) {
+                    amountElement.textContent = `x${this.transferAmount}`;
+                } else if (isShop && this.dragStartInventoryType == 'other') {
+                    amountElement.textContent = `x1`;
+                }
+            }
+            return ghostElement;
+        },
+        drag(event) {
+            if (this.isMouseDown && !this.ghostElement) {
+                const dx = Math.abs(event.clientX - this.mouseDownX);
+                const dy = Math.abs(event.clientY - this.mouseDownY);
+                if (dx >= this.dragThreshold || dy >= this.dragThreshold) {
+                    this.startDrag(event, this.currentlyDraggingSlot, this.dragStartInventoryType);
+                }
+                return;
+            }
+
+            if (!this.currentlyDraggingItem || !this.ghostElement) return;
+
+            const centeredX = event.clientX - this.ghostElement.offsetWidth / 2;
+            const centeredY = event.clientY - this.ghostElement.offsetHeight / 2;
+            this.ghostElement.style.left = `${centeredX}px`;
+            this.ghostElement.style.top = `${centeredY}px`;
+        },
+        endDrag(event) {
+            this.isMouseDown = false;
+            if (!this.currentlyDraggingItem) {
+                return;
+            }
+            const targetPlayerItemSlotElement = event.target.closest(".player-inventory .item-slot");
+            if (targetPlayerItemSlotElement) {
+                const targetSlot = Number(targetPlayerItemSlotElement.dataset.slot);
+                if (targetSlot && !(targetSlot === this.currentlyDraggingSlot && this.dragStartInventoryType === "player")) {
+                    this.handleDropOnPlayerSlot(targetSlot);
+                }
+            }
+            const targetOtherItemSlotElement = event.target.closest(".other-inventory .item-slot");
+            if (targetOtherItemSlotElement) {
+                const targetSlot = Number(targetOtherItemSlotElement.dataset.slot);
+                if (targetSlot && !(targetSlot === this.currentlyDraggingSlot && this.dragStartInventoryType === "other")) {
+                    this.handleDropOnOtherSlot(targetSlot);
+                }
+            }
+            const targetTradeContainer = event.target.closest(".trade-container, .trade-panel, .trade-items");
+            if (targetTradeContainer && this.dragStartInventoryType === "player" && this.isTradeActive) {
+                const amount = this.transferAmount !== null ? this.transferAmount : this.currentlyDraggingItem.amount;
+                this.addItemToTrade(this.currentlyDraggingItem, amount);
+            } else {
+                const targetInventoryContainer = event.target.closest(".inventory-container");
+                if (targetInventoryContainer && !targetPlayerItemSlotElement && !targetOtherItemSlotElement) {
+                    this.handleDropOnInventoryContainer();
+                }
+            }
+            this.clearDragData();
+        },
+        handleDropOnPlayerSlot(targetSlot) {
+            if (this.isShopInventory && this.dragStartInventoryType === "other") {
+                const { currentlyDraggingSlot, currentlyDraggingItem, transferAmount } = this;
+                const targetInventory = this.getInventoryByType("player");
+                const targetItem = targetInventory[targetSlot];
+                if ((targetItem && targetItem.name !== currentlyDraggingItem.name)
+                    || (targetItem && targetItem.name === currentlyDraggingItem.name && currentlyDraggingItem.unique)
+                    || (targetItem && targetItem.name === currentlyDraggingItem.name && targetItem.info.quality && targetItem.info.quality !== 100)) {
+                    this.inventoryError(currentlyDraggingSlot);
+                    return;
+                }
+                this.handlePurchase(currentlyDraggingSlot, currentlyDraggingItem, transferAmount, this.dragStartInventoryType, targetSlot);
+            } else {
+                this.handleItemDrop("player", targetSlot);
+            }
+        },
+        handleDropOnOtherSlot(targetSlot) {
+            this.handleItemDrop("other", targetSlot);
+        },
+        async handleDropOnInventoryContainer() {
+            if (this.isOtherInventoryEmpty && this.dragStartInventoryType === "player") {
+                const newItem = {
+                    ...this.currentlyDraggingItem,
+                    amount: this.currentlyDraggingItem.amount,
+                    slot: 1,
+                    inventory: "other",
+                };
+                const draggingItem = this.currentlyDraggingItem;
+                try {
+                    const response = await axios.post("https://rsg-inventory/DropItem", {
+                        ...newItem,
+                        fromSlot: this.currentlyDraggingSlot,
+                    });
+
+                    if (response.data) {
+                        this.otherInventory[1] = newItem;
+                        const draggingItemKey = Object.keys(this.playerInventory).find((key) => this.playerInventory[key] === draggingItem);
+                        if (draggingItemKey) {
+                            delete this.playerInventory[draggingItemKey];
+                        }
+                        this.otherInventoryName = response.data;
+                        this.otherInventoryLabel = response.data;
+                        this.isOtherInventoryEmpty = false;
+                        this.clearDragData();
+                    }
+                } catch (error) {
+                    this.inventoryError(this.currentlyDraggingSlot);
+                }
+            }
+            this.clearDragData();
+        },
+        clearDragData() {
+            if (this.ghostElement) {
+                document.body.removeChild(this.ghostElement);
+                this.ghostElement = null;
+            }
+            this.currentlyDraggingItem = null;
+            this.currentlyDraggingSlot = null;
+        },
+        getInventoryByType(inventoryType) {
+            return inventoryType === "player" ? this.playerInventory : this.otherInventory;
+        },
+        handleItemDrop(targetInventoryType, targetSlot) {
+            try {
+                const isShop = this.otherInventoryName.indexOf("shop-");
+                if (this.dragStartInventoryType === "other" && targetInventoryType === "other" && isShop !== -1) {
+                    return;
+                }
+
+                const targetSlotNumber = parseInt(targetSlot, 10);
+                if (isNaN(targetSlotNumber)) {
+                    throw new Error("Invalid target slot number");
+                }
+
+                const sourceInventory = this.getInventoryByType(this.dragStartInventoryType);
+                const targetInventory = this.getInventoryByType(targetInventoryType);
+
+                const sourceItem = sourceInventory[this.currentlyDraggingSlot];
+                if (!sourceItem) {
+                    throw new Error("No item in the source slot to transfer");
+                }
+
+                const amountToTransfer = this.transferAmount !== null ? this.transferAmount : sourceItem.amount;
+                if (sourceItem.amount < amountToTransfer) {
+                    throw new Error("Insufficient amount of item in source inventory");
+                }
+
+                if (this.dragStartInventoryType === "player" && targetInventoryType === "other" && isShop !== -1) {
+                    this.handlePurchase(
+                        this.currentlyDraggingSlot,
+                        sourceItem,
+                        this.transferAmount !== null ? this.transferAmount : sourceItem.amount,
+                        this.dragStartInventoryType)
+                    return;
+                }
+
+                if (targetInventoryType !== this.dragStartInventoryType) {
+                    if (targetInventoryType == "other") {
+                        const totalWeightAfterTransfer = this.otherInventoryWeight + sourceItem.weight * amountToTransfer;
+                        if (totalWeightAfterTransfer > this.otherInventoryMaxWeight) {
+                            throw new Error("Insufficient weight capacity in target inventory");
+                        }
+                    }
+                    else if (targetInventoryType == "player") {
+                        const totalWeightAfterTransfer = this.playerWeight + sourceItem.weight * amountToTransfer;
+                        if (totalWeightAfterTransfer > this.maxWeight) {
+                            throw new Error("Insufficient weight capacity in player inventory");
+                        }
+                    }
+                }
+
+                const targetItem = targetInventory[targetSlotNumber];
+
+                if (targetItem) {
+                    if (sourceItem.name === targetItem.name && targetItem.unique) {
+                        this.inventoryError(this.currentlyDraggingSlot);
+                        return;
+                    }
+                    if (sourceItem.name === targetItem.name && !targetItem.unique && sourceItem.info.quality == targetItem.info.quality) {
+                        targetItem.amount += amountToTransfer;
+                        sourceItem.amount -= amountToTransfer;
+                        if (sourceItem.amount <= 0) {
+                            delete sourceInventory[this.currentlyDraggingSlot];
+                        }
+                        this.postInventoryData(this.dragStartInventoryType, targetInventoryType, this.currentlyDraggingSlot, targetSlotNumber, sourceItem.amount, amountToTransfer);
+                    } else {
+                        sourceInventory[this.currentlyDraggingSlot] = targetItem;
+                        targetInventory[targetSlotNumber] = sourceItem;
+                        sourceInventory[this.currentlyDraggingSlot].slot = this.currentlyDraggingSlot;
+                        targetInventory[targetSlotNumber].slot = targetSlotNumber;
+                        this.postInventoryData(this.dragStartInventoryType, targetInventoryType, this.currentlyDraggingSlot, targetSlotNumber, sourceItem.amount, targetItem.amount);
+                    }
+                } else {
+                    sourceItem.amount -= amountToTransfer;
+                    if (sourceItem.amount <= 0) {
+                        delete sourceInventory[this.currentlyDraggingSlot];
+                    }
+                    targetInventory[targetSlotNumber] = { ...sourceItem, amount: amountToTransfer, slot: targetSlotNumber };
+                    this.postInventoryData(this.dragStartInventoryType, targetInventoryType, this.currentlyDraggingSlot, targetSlotNumber, sourceItem.amount, amountToTransfer);
+                }
+            } catch (error) {
+                console.error(error.message);
+                this.inventoryError(this.currentlyDraggingSlot);
+            } finally {
+                this.clearDragData();
+            }
+        },
+        async handlePurchase(sourceSlot, sourceItem, transferAmount, sourceInventoryType, targetSlot = null) {
+            if (this.busy) {
+                return;
+            }
+
+            if (sourceItem.amount < 1) {
+                this.inventoryError(sourceSlot);
+                return;
+            }
+
+            this.busy = true;
+            try {
+                const response = await axios.post("https://rsg-inventory/AttemptPurchase", {
+                    item: sourceItem,
+                    amount: transferAmount || 1,
+                    shop: this.otherInventoryName,
+                    sourceinvtype: sourceInventoryType,
+                    targetslot: targetSlot,
+                });
+
+                if (response.data) {
+                    if (!sourceItem.amount) {
+                        this.busy = false;
+                        return;
+                    }
+
+                    const amountToTransfer = transferAmount !== null ? transferAmount : 1;
+                    if (sourceInventoryType == 'player') {
+                        for (const key in this.otherInventory) {
+                            const item = this.otherInventory[key];
+                            if (item.name == sourceItem.name && item.amount !== undefined) {
+                                this.otherInventory[key].amount += amountToTransfer
+                                break
+                            }
+                        }
+                    } else {
+                        if (sourceItem.amount < amountToTransfer) {
+                            this.inventoryError(sourceSlot);
+                            this.busy = false;
+                            return;
+                        }
+                        sourceItem.amount -= amountToTransfer;
+                    }
+
+                    this.busy = false;
+                } else {
+                    this.inventoryError(sourceSlot);
+                    this.busy = false;
+                }
+            } catch (error) {
+                this.inventoryError(sourceSlot);
+                this.busy = false;
+            }
+        },
+        async dropItem(item, quantity) {
+            if (item && item.name) {
+                const playerItemKey = Object.keys(this.playerInventory).find((key) =>
+                    this.playerInventory[key] && this.playerInventory[key].slot === item.slot
+                );
+
+                if (playerItemKey) {
+                    let amountToGive;
+
+                    if (typeof quantity === "string") {
+                        switch (quantity) {
+                            case "half":
+                                amountToGive = Math.ceil(item.amount / 2);
+                                break;
+                            case "all":
+                                amountToGive = item.amount;
+                                break;
+                            case "enteramount":
+                                const amounttt = await axios.post("https://rsg-inventory/GiveItemAmount", {})
+                                amountToGive = amounttt.data;
+                                break;
+                            default:
+                                console.error("Invalid quantity specified.");
+                                return;
+                        }
+                    } else if (typeof quantity === "number" && quantity > 0) {
+                        amountToGive = quantity;
+                    } else {
+                        console.error("Invalid quantity type specified.");
+                        return;
+                    }
+
+                    amountToGive = Math.floor(Number(amountToGive) || 0);
+                    if (amountToGive < 1) {
+                        this.showContextMenu = false;
+                        return;
+                    }
+                    if (amountToGive > item.amount) {
+                        amountToGive = item.amount;
+                    }
+
+                    const newItem = {
+                        ...item,
+                        amount: amountToGive,
+                        slot: 1,
+                        inventory: "other",
+                    };
+
+                    try {
+                        const response = await axios.post("https://rsg-inventory/DropItem", {
+                            ...newItem,
+                            fromSlot: item.slot,
+                        });
+
+                        if (response.data) {
+                            const remainingAmount = this.playerInventory[playerItemKey].amount - amountToGive;
+                            if (remainingAmount <= 0) {
+                                delete this.playerInventory[playerItemKey];
+                            } else {
+                                this.playerInventory[playerItemKey].amount = remainingAmount;
+                            }
+
+                            this.otherInventory[1] = newItem;
+                            this.otherInventoryName = response.data;
+                            this.otherInventoryLabel = response.data;
+                            this.isOtherInventoryEmpty = false;
+                        }
+                    } catch (error) {
+                        this.inventoryError(item.slot);
+                    }
+                }
+            }
+            this.showContextMenu = false;
+        },
+        async useItem(item) {
+            if (!item || item.useable === false) {
+                return;
+            }
+            const playerItemKey = Object.keys(this.playerInventory).find((key) => this.playerInventory[key] && this.playerInventory[key].slot === item.slot);
+            if (playerItemKey) {
+                try {
+                    if (item.shouldClose) {
+                        this.closeInventory();
+                    }
+                    await axios.post("https://rsg-inventory/UseItem", {
+                        inventory: "player",
+                        item: item,
+                    });
+                } catch (error) {
+                    console.error("Error using the item: ", error);
+                }
+            }
+            this.showContextMenu = false;
+        },
+        showContextMenuOptions(event, item) {
+            event.preventDefault();
+            if (this.contextMenuItem && this.contextMenuItem.name === item.name && this.showContextMenu) {
+                this.showContextMenu = false;
+                this.contextMenuItem = null;
+            } else {
+                this.hideItemInfo();
+                const menuLeft = event.clientX;
+                const menuTop = event.clientY;
+                this.showContextMenu = true;
+                this.contextMenuPosition = {
+                    top: `${menuTop}px`,
+                    left: `${menuLeft}px`,
+                };
+                this.contextMenuItem = item;
+            }
+        },
+        attachGridScrollListeners() {
+
+            if (this.scrollBoundElements && this.scrollBoundElements.length) {
+                this.scrollBoundElements.forEach((el) => {
+                    el.removeEventListener('scroll', this.hideItemInfo);
+                    el.removeEventListener('wheel', this.hideItemInfo);
+                });
+            }
+            this.scrollBoundElements = [];
+
+            const grids = document.querySelectorAll('.item-grid');
+            grids.forEach((el) => {
+                el.addEventListener('scroll', this.hideItemInfo, { passive: true });
+                el.addEventListener('wheel', this.hideItemInfo, { passive: true });
+                this.scrollBoundElements.push(el);
+            });
+        },
+        detachGridScrollListeners() {
+            if (!this.scrollBoundElements) return;
+            this.scrollBoundElements.forEach((el) => {
+                el.removeEventListener('scroll', this.hideItemInfo);
+                el.removeEventListener('wheel', this.hideItemInfo);
+            });
+            this.scrollBoundElements = [];
+        },
+        async giveItem(item, quantity) {
+            if (item && item.name) {
+                const selectedItem = item;
+                const playerHasItem = Object.values(this.playerInventory).some((invItem) => invItem && invItem.name === selectedItem.name);
+
+                if (playerHasItem) {
+                    let amountToGive;
+                    if (typeof quantity === "string") {
+                        switch (quantity) {
+                            case "half":
+                                amountToGive = Math.ceil(selectedItem.amount / 2);
+                                break;
+                            case "all":
+                                amountToGive = selectedItem.amount;
+                                break;
+                            case "enteramount":
+                                const amounttt = await axios.post("https://rsg-inventory/GiveItemAmount", {})
+                                amountToGive = amounttt.data;
+                                break;
+                            default:
+                                console.error("Invalid quantity specified.");
+                                return;
+                        }
+                    } else {
+                        amountToGive = quantity;
+                    }
+
+                    amountToGive = Math.floor(Number(amountToGive) || 0);
+                    if (amountToGive < 1 || amountToGive > selectedItem.amount) {
+                        this.showContextMenu = false;
+                        return;
+                    }
+
+                    try {
+                        const response = await axios.post("https://rsg-inventory/GiveItem", {
+                            item: selectedItem,
+                            amount: amountToGive,
+                            slot: selectedItem.slot,
+                        });
+                        if (!response.data) return;
+
+                        this.playerInventory[selectedItem.slot].amount -= amountToGive;
+                        if (this.playerInventory[selectedItem.slot].amount <= 0) {
+                            delete this.playerInventory[selectedItem.slot];
+                        }
+                    } catch (error) {
+                        console.error("An error occurred while giving the item:", error);
+                    }
+                } else {
+                    console.error("Player does not have the item in their inventory. Item cannot be given.");
+                }
+            }
+            this.showContextMenu = false;
+        },
+        findNextAvailableSlot(inventory, maxSlots = this.totalSlots) {
+            for (let slot = 1; slot <= maxSlots; slot++) {
+                if (!inventory[slot]) {
+                    return slot;
+                }
+            }
+            return null;
+        },
+        async splitAndPlaceItem(item, inventoryType, splitamount = 'half') {
+            const inventoryRef = inventoryType === "player" ? this.playerInventory : this.otherInventory;
+            let amount = 1;
+            if (item && item.amount > 1) {
+                if (splitamount == 'half') {
+                    amount = Math.floor(item.amount / 2);
+                } else if (splitamount == 'enteramount') {
+                    const inputAmount = await axios.post("https://rsg-inventory/GiveItemAmount", {})
+                    amount = Math.floor(Number(inputAmount.data) || 0);
+                }
+                // a split must leave at least one item behind
+                if (amount < 1 || amount >= item.amount) {
+                    this.showContextMenu = false;
+                    return;
+                }
+
+                const originalSlot = Object.keys(inventoryRef).find((key) => inventoryRef[key] === item);
+                if (originalSlot !== undefined) {
+                    const newItem = { ...item, amount: amount };
+                    const maxSlots = inventoryType === "player" ? this.totalSlots : this.otherInventorySlots;
+                    const nextSlot = this.findNextAvailableSlot(inventoryRef, maxSlots);
+                    if (nextSlot !== null) {
+                        newItem.slot = nextSlot;
+                        inventoryRef[nextSlot] = newItem;
+                        inventoryRef[originalSlot] = { ...item, amount: item.amount - amount };
+                        this.postInventoryData(inventoryType, inventoryType, originalSlot, nextSlot, item.amount, newItem.amount);
+                    }
+                }
+            }
+            this.showContextMenu = false;
+        },
+        toggleHotbar(data) {
+            if (data.open) {
+                this.hotbarItems = data.items;
+                this.showHotbar = true;
+            } else {
+                this.showHotbar = false;
+                this.hotbarItems = [];
+            }
+        },
+        showItemNotification(itemData) {
+            const item = itemData.item || {};
+            const rawType = (itemData.type || '').toLowerCase();
+
+            this.notificationText = item.label || "";
+            this.notificationImage = item.image ? "images/" + item.image : "";
+
+            // Robust mapping of types to localized labels
+            const typeMap = {
+            add: this.t.received,
+            added: this.t.received,
+            receive: this.t.received,
+
+            use: this.t.used,
+            used: this.t.used,
+
+            drop: this.t.removed,
+            remove: this.t.removed,
+            removed: this.t.removed
+            };
+
+            // Displayed text (localized)
+            this.notificationType = typeMap[rawType] || this.t[rawType] || (rawType ? rawType.charAt(0).toUpperCase() + rawType.slice(1) : "");
+
+            // Stable CSS class (non-localized) to preserve your .type-add / .type-use / .type-remove styles
+            this.notificationClass = (rawType === 'added') ? 'add'
+            : (rawType === 'removed') ? 'remove'
+            : (rawType === 'use' || rawType === 'used') ? 'use'
+            : (rawType === 'drop') ? 'remove'
+            : rawType;
+
+            this.notificationAmount = itemData.amount || 1;
+            const desc = item.info?.description || item.description || "";
+            this.notificationDescription = typeof desc === 'string' ? this.escapeHtml(desc).replace(/\n/g, "<br>") : '';
+            this.showNotification = true;
+
+            if (this.notificationTimeout) {
+                clearTimeout(this.notificationTimeout);
+            }
+
+            this.notificationTimeout = setTimeout(() => {
+                this.showNotification = false;
+                this.notificationDescription = "";
+                this.notificationTimeout = null;
+            }, 3000);
+        },
+        inventoryError(slot) {
+            const slotElement = document.getElementById(`slot-${slot}`);
+            if (slotElement) {
+                slotElement.style.backgroundColor = "red";
+            }
+            axios.post("https://rsg-inventory/PlayDropFail", {}).catch((error) => {
+                console.error("Error playing drop fail:", error);
+            });
+            setTimeout(() => {
+                if (slotElement) {
+                    slotElement.style.backgroundColor = "";
+                }
+            }, 1000);
+        },
+        copySerial() {
+            if (!this.contextMenuItem) {
+                return;
+            }
+            const item = this.contextMenuItem;
+            if (item) {
+                const el = document.createElement("textarea");
+                el.value = item.info.serie;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand("copy");
+                document.body.removeChild(el);
+            }
+        },
+        escapeHtml(value) {
+            return String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        },
+        generateDynamicTooltipContent(item) {
+            if (!item) {
+                return "";
+            }
+            const esc = (v) => this.escapeHtml(v);
+            const hidden = new Set(["description", "lastUpdate", "componentshash", "components"]);
+
+            const renderInfo = (obj, indent = 0) => {
+                let html = "";
+                for (const [key, value] of Object.entries(obj)) {
+                    if (hidden.has(key)) continue;
+                    const padding = "&nbsp;".repeat(indent * 4);
+                    const label = `<span class="tooltip-info-key">${padding}${esc(this.formatKey(key))}:</span>`;
+                    if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+                        html += `<div class="tooltip-info">${label}</div>` + renderInfo(value, indent + 1);
+                    } else {
+                        html += `<div class="tooltip-info">${label} ${esc(value)}</div>`;
+                    }
+                }
+                return html;
+            };
+
+            let content = "";
+            if (item.info && typeof item.info === "object" && Object.keys(item.info).length > 0) {
+                content += renderInfo(item.info);
+            }
+
+            const rawDescription = (typeof item.info?.description === "string" && item.info.description) || item.description || "";
+            if (rawDescription) {
+                content += `<div class="tooltip-description">${esc(rawDescription).replace(/\n/g, "<br>")}</div>`;
+            }
+
+            content += `<div class="tooltip-weight"><i class="fas fa-weight-hanging"></i> ${item.weight != null ? (item.weight / 1000).toFixed(1) : "N/A"}kg</div>`;
+            return content;
+        },
+        formatKey(key) {
+            return key.replace(/_/g, " ").charAt(0).toUpperCase() + key.slice(1);
+        },
+        postInventoryData(fromInventory, toInventory, fromSlot, toSlot, fromAmount, toAmount) {
+            this.busy = true;
+            let fromInventoryName = fromInventory === "other" ? this.otherInventoryName : fromInventory;
+            let toInventoryName = toInventory === "other" ? this.otherInventoryName : toInventory;
+
+            axios
+                .post("https://rsg-inventory/SetInventoryData", {
+                    fromInventory: fromInventoryName,
+                    toInventory: toInventoryName,
+                    fromSlot,
+                    toSlot,
+                    fromAmount,
+                    toAmount,
+                })
+                .then((response) => {
+                    this.clearDragData();
+                    this.busy = false;
+                })
+                .catch((error) => {
+                    console.error("Error posting inventory data:", error);
+                    this.busy = false;
+                });
+        },
+        // -------- Trade Methods --------
+        openTrade(data) {
+            this.isInventoryOpen = true;
+            this.maxWeight = data.maxweight || 0;
+            this.totalSlots = data.slots || 0;
+            this.playerId = data.playerId || null;
+            this.playerName = data.playerName || null;
+            this.cash = data.cash || 0;
+            this.playerInventory = {};
+            this.otherInventory = {};
+            this.isOtherInventoryEmpty = true;
+
+            if (data.labels) {
+                this.t = { ...this.t, ...data.labels };
+                this.inventoryLabel = this.t.satchel || this.inventoryLabel;
+            }
+
+            if (data.inventory) {
+                if (Array.isArray(data.inventory)) {
+                    data.inventory.forEach((item) => {
+                        if (item && item.slot) {
+                            this.playerInventory[item.slot] = item;
+                        }
+                    });
+                } else if (typeof data.inventory === "object") {
+                    for (const key in data.inventory) {
+                        const item = data.inventory[key];
+                        if (item && item.slot) {
+                            this.playerInventory[item.slot] = item;
+                        }
+                    }
+                }
+            }
+
+            this.tradeId = data.tradeId;
+            this.tradePartner = data.partnerId;
+            this.tradePartnerName = data.partnerName;
+            this.myTradeOffers = {};
+            this.theirTradeOffers = {};
+            this.myTradeAccepted = false;
+            this.theirTradeAccepted = false;
+            this.isTradeActive = true;
+            this.isTradeComplete = false;
+
+            this.$nextTick(() => {
+                this.attachGridScrollListeners();
+            });
+        },
+        updateTrade(data) {
+            const tradeData = data.tradeData;
+            const myId = Number(this.playerId);
+            const isInitiator = Number(tradeData.initiator) === myId;
+            this.myTradeAccepted = isInitiator ? tradeData.initiatorAccepted : tradeData.targetAccepted;
+            this.theirTradeAccepted = isInitiator ? tradeData.targetAccepted : tradeData.initiatorAccepted;
+            this.myTradeOffers = isInitiator ? tradeData.initiatorItems : tradeData.targetItems;
+            this.theirTradeOffers = isInitiator ? tradeData.targetItems : tradeData.initiatorItems;
+        },
+        cancelTradeUI() {
+            this.isTradeActive = false;
+            this.isTradeComplete = false;
+            this.tradeId = null;
+            this.tradePartner = null;
+            this.tradePartnerName = null;
+            this.myTradeOffers = {};
+            this.theirTradeOffers = {};
+            this.myTradeAccepted = false;
+            this.theirTradeAccepted = false;
+        },
+        completeTradeUI() {
+            this.isTradeActive = false;
+            this.isTradeComplete = true;
+            this.tradeId = null;
+            this.tradePartner = null;
+            this.tradePartnerName = null;
+            this.myTradeOffers = {};
+            this.theirTradeOffers = {};
+            this.myTradeAccepted = false;
+            this.theirTradeAccepted = false;
+            this.closeInventory();
+        },
+        addItemToTrade(item, amount) {
+            if (!this.isTradeActive || !this.tradeId) return;
+            const amountToAdd = amount !== undefined ? amount : item.amount;
+            if (amountToAdd < 1 || amountToAdd > item.amount) return;
+            axios.post("https://rsg-inventory/AddTradeItem", {
+                tradeId: this.tradeId,
+                item: item,
+                amount: amountToAdd,
+            }).catch((error) => {
+                console.error("Error adding item to trade:", error);
+            });
+            this.showContextMenu = false;
+        },
+        async addItemToTradeWithPrompt(item) {
+            if (!this.isTradeActive || !this.tradeId) return;
+            try {
+                const response = await axios.post("https://rsg-inventory/GiveItemAmount", {});
+                const amount = response.data;
+                if (amount && amount > 0 && amount <= item.amount) {
+                    this.addItemToTrade(item, amount);
+                }
+            } catch (error) {
+                console.error("Error getting trade amount:", error);
+            }
+            this.showContextMenu = false;
+        },
+        removeItemFromTrade(tradeSlot) {
+            if (!this.isTradeActive || !this.tradeId) return;
+            axios.post("https://rsg-inventory/RemoveTradeItem", {
+                tradeId: this.tradeId,
+                tradeSlot: tradeSlot,
+            }).catch((error) => {
+                console.error("Error removing item from trade:", error);
+            });
+        },
+        confirmTrade() {
+            if (!this.isTradeActive || !this.tradeId) return;
+            axios.post("https://rsg-inventory/ConfirmTrade", {
+                tradeId: this.tradeId,
+            }).catch((error) => {
+                console.error("Error confirming trade:", error);
+            });
+        },
+        cancelTrade() {
+            if (!this.isTradeActive || !this.tradeId) return;
+            axios.post("https://rsg-inventory/CancelTrade", {
+                tradeId: this.tradeId,
+            }).catch((error) => {
+                console.error("Error cancelling trade:", error);
+            });
+        },
+        initiateTrade(targetId) {
+            axios.post("https://rsg-inventory/InitiateTrade", {
+                targetId: targetId,
+            }).catch((error) => {
+                console.error("Error initiating trade:", error);
+            });
+        },
+    },
+    // ---------------------------------
+    mounted() {
+        // Inject CSRF token into all outgoing NUI callback calls
+        axios.interceptors.request.use((config) => {
+            if (config.url && config.url.startsWith("https://rsg-inventory/")) {
+                const token = window.nuiToken;
+                if (token && typeof config.data === "object" && config.data !== null) {
+                    config.data.token = token;
+                }
+            }
+            return config;
+        });
+
+        window.addEventListener("keyup", (event) => {
+            const code = event.code;
+            if (code === "Escape" || code === "Tab" || code === this.additionalCloseKey) {
+                if (this.isInventoryOpen) {
+                    this.closeInventory();
+                }
+            }
+        });
+
+        window.addEventListener("message", async (event) => {
+            // Store callback token for NUI callback CSRF validation
+            if (event.data.invToken) {
+                this.nuiToken = event.data.invToken;
+                window.nuiToken = event.data.invToken;
+            }
+
+            switch (event.data.action) {
+                case "open":
+                    let isValid = await this.validateToken(event.data.token)
+                    if (isValid) {
+                        this.openInventory(event.data);
+                    }
+                    break;
+                case "close":
+                    this.closeInventory();
+                    break;
+                case "update":
+                    if (await this.validateToken(event.data.token)) {
+                        this.updateInventory(event.data);
+                        this.$nextTick(() => this.attachGridScrollListeners());
+                    }
+                    break;
+                case "toggleHotbar":
+                    if (await this.validateToken(event.data.token)) {
+                        this.toggleHotbar(event.data);
+                    }
+                    break;
+                case "itemBox":
+                    if (event.data.labels) {
+                    this.t = { ...this.t, ...event.data.labels };
+                    }
+                    this.showItemNotification(event.data);
+                    break;
+                case "refresh":
+                    if (await this.validateToken(event.data.token)) {
+                        this.refreshInventories(event.data);
+                    }
+                    break;
+                case "updateHotbar":
+                    if (await this.validateToken(event.data.token)) {
+                        this.hotbarItems = event.data.items;
+                    }
+                    break;
+                case "openTrade":
+                    if (await this.validateToken(event.data.token)) {
+                        this.openTrade(event.data);
+                    }
+                    break;
+                case "updateTrade":
+                    if (await this.validateToken(event.data.token)) {
+                        this.updateTrade(event.data);
+                    }
+                    break;
+                case "cancelTrade":
+                    if (await this.validateToken(event.data.token)) {
+                        this.cancelTradeUI();
+                    }
+                    break;
+                case "completeTrade":
+                    if (await this.validateToken(event.data.token)) {
+                        this.completeTradeUI();
+                    }
+                    break;
+                default:
+                    console.warn(`Unexpected action: ${event.data.action}`);
+            }
+        });
+    },
+    beforeUnmount() {
+        this.detachGridScrollListeners();
+    },
+});
+
+InventoryContainer.use(FloatingVue);
+InventoryContainer.mount("#app");

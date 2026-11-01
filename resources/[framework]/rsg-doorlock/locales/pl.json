@@ -1,0 +1,8 @@
+{
+    "sv_nokey" : "Nie posiadasz klucza!",
+
+    "cl_use_door" : "Użyj",
+    "cl_door_status_base" : "Stan drzwi: ",
+    "cl_door_status_lock" : "Zamknięte",
+    "cl_door_status_unlock" : "Otworzone"
+}

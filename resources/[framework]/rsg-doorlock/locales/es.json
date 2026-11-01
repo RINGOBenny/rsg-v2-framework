@@ -1,0 +1,8 @@
+{
+    "sv_nokey": "¡No tienes una llave!",
+
+    "cl_use_door": "Usar",
+    "cl_door_status_base": "Estado de la puerta: ",
+    "cl_door_status_lock": "Bloqueada",
+    "cl_door_status_unlock": "Desbloqueada"
+}

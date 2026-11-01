@@ -1,0 +1,13 @@
+* text=auto
+*.png binary
+*.jpg binary
+*.webp binary
+*.mp3 binary
+*.ogg binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
+*.ytd binary
+*.ydr binary
+*.ymap binary
+*.ytyp binary

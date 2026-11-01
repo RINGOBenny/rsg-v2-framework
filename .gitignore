@@ -1,0 +1,21 @@
+# Secrets and local server config
+server.cfg
+.env
+*.key
+*.pem
+resources/\[optional\]/rsg-discord/config.js
+
+# Server runtime data
+cache/
+txData/
+*.log
+
+# Base resources installed separately
+resources/\[cfx-default\]/
+resources/\[standalone\]/weathersync/
+
+# Build and OS files
+node_modules/
+Thumbs.db
+desktop.ini
+.DS_Store

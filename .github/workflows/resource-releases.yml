@@ -1,0 +1,65 @@
+name: Resource releases
+
+# Publishes one GitHub release per resource. A release is created only when
+# that resource's fxmanifest version has no release yet.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'resources/**'
+      - '.github/workflows/resource-releases.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: resource-releases
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create missing releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          failed=0
+          for manifest in resources/*/*/fxmanifest.lua; do
+            dir="$(dirname "$manifest")"
+            name="$(basename "$dir")"
+            version="$(sed -nE "s/^[[:space:]]*version[[:space:]]+['\"]([^'\"]+)['\"].*/\1/p" "$manifest" | head -n 1)"
+            if [ -z "$version" ]; then
+              echo "::warning::$name has no version in fxmanifest.lua, skipped"
+              continue
+            fi
+
+            tag="$name-v$version"
+            if gh release view "$tag" >/dev/null 2>&1; then
+              echo "$tag already released"
+              continue
+            fi
+
+            archive="$RUNNER_TEMP/$tag.zip"
+            (cd "$(dirname "$dir")" && zip -qr "$archive" "$name")
+
+            notes="$RUNNER_TEMP/$tag.md"
+            printf '%s\n' \
+              "**$name** $version for RSG v2 Framework." \
+              "" \
+              "Unzip into your server's \`resources\` folder. Requires the framework's core resources; see docs/INSTALL.md." \
+              "" \
+              "License and credits: see the LICENSE file in the archive and NOTICE.md." > "$notes"
+
+            if gh release create "$tag" "$archive" --title "$name $version" --notes-file "$notes" --target "$GITHUB_SHA" --latest=false; then
+              echo "Released $tag"
+            else
+              echo "::error::Could not release $tag"
+              failed=1
+            fi
+            sleep 3
+          done
+          exit "$failed"

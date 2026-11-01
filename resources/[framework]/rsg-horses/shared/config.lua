@@ -1,0 +1,447 @@
+Config = {}
+lib.locale()
+
+Config.horsesShopItems = {
+    { name = 'horse_brush',     amount = 10, price = 5 },
+    { name = 'horse_lantern',   amount = 10, price = 10 },
+    { name = 'horsecarrot',     amount = 50, price = 1 },
+    { name = 'horseapple',      amount = 50, price = 1 },
+    { name = 'hay',             amount = 50, price = 1 },
+    { name = 'horse_stimulant', amount = 25, price = 2 },
+    { name = 'horse_reviver',   amount = 25, price = 10 },
+    { name = 'horse_holster',   amount = 25, price = 20 },
+}
+Config.PersistStock = false -- save shop stock in the database across restarts
+
+---------------------------------
+-- horse holster: long-arm weapons that can be stored on the horse
+-- key = weapon hash, value = inventory item name
+---------------------------------
+Config.HolsterWeapons = {
+    [`WEAPON_RIFLE_SPRINGFIELD`]    = 'weapon_rifle_springfield',
+    [`WEAPON_RIFLE_ROLLINGBLOCK`]   = 'weapon_rifle_rollingblock',
+    [`WEAPON_RIFLE_BOLTACTION`]     = 'weapon_rifle_boltaction',
+    [`WEAPON_RIFLE_VARMINT`]        = 'weapon_rifle_varmint',
+    [`WEAPON_RIFLE_ELEPHANT`]       = 'weapon_rifle_elephant',
+    [`WEAPON_RIFLE_CARCANO`]        = 'weapon_rifle_carcano',
+    [`WEAPON_RIFLE_LANCASTER`]      = 'weapon_rifle_lancaster',
+    [`WEAPON_RIFLE_HENRY`]          = 'weapon_rifle_henry',
+    [`WEAPON_SHOTGUN_DOUBLEBARREL`] = 'weapon_shotgun_doublebarrel',
+    [`WEAPON_SHOTGUN_SEMIAUTO`]     = 'weapon_shotgun_semiauto',
+    [`WEAPON_SHOTGUN_PUMP`]         = 'weapon_shotgun_pump',
+    [`WEAPON_SHOTGUN_REPEATING`]    = 'weapon_shotgun_repeating',
+    [`WEAPON_SHOTGUN_SAWNOFF`]      = 'weapon_shotgun_sawnoff',
+    [`WEAPON_BOW`]                  = 'weapon_bow',
+    [`WEAPON_BOW_IMPROVED`]         = 'weapon_bow_improved',
+    [`WEAPON_REPEATER_CARBINE`]     = 'weapon_repeater_carbine',
+    [`WEAPON_REPEATER_WINCHESTER`]  = 'weapon_repeater_winchester',
+    [`WEAPON_REPEATER_EVANS`]       = 'weapon_repeater_evans',
+}
+Config.Prompt = {
+    HorseDrink = 0xD8CF0C95,
+    HorseGraze = 0xD8CF0C95,
+    HorseLay = 0xD8CF0C95,
+    HorsePlay = 0x620A6C5E,
+}
+
+Config.TrickXp = {
+    Lay = 1000,
+    Play = 2000
+}
+
+Config.ComponentHash = {
+    Blankets = 0x17CEB41A,
+    Saddles = 0xBAA7E618,
+    Horns = 0x05447332,
+    Saddlebags = 0x80451C25,
+    Stirrups = 0xDA6DADCA,
+    Bedrolls = 0xEFB31921,
+    Tails = 0xA63CAE10,
+    Manes = 0xAA0217AB,
+    Masks = 0xD3500E5D,
+    Mustaches = 0x30DEFDDF,
+}
+
+Config.PriceComponent = {
+    Blankets = 5,
+    Saddles = 2,
+    Horns = 10,
+    Saddlebags = 3,
+    Stirrups = 4,
+    Bedrolls = 5,
+    Tails = 4,
+    Manes = 3,
+    Masks = 3,
+    Mustaches = 2,
+}
+
+---------------------------------
+-- horse coat color / markings (merged from horse_markings test resource)
+-- tint0 = main coat colour (0-254), tint1 = horse marking (0-255), tint2 = nose (0-255)
+-- mane/tail = mane & tail colours (0-254), applied to mane/tail components
+-- applied via SetMetaPedTag on horse_bodies + horse_heads with palette metaped_tint_horse
+---------------------------------
+Config.Coat = {
+    Price = 100, -- flat price charged when coat/mane/tail differs from saved coat
+    Palette = 'metaped_tint_horse',
+    Default = { tint0 = 0, tint1 = 255, tint2 = 255, mane = 0, tail = 0 },
+}
+
+---------------------------------
+-- general settings
+---------------------------------
+Config.EnableTarget        = true -- toggle between target and prompt
+Config.Automount           = false -- horse automount
+Config.SpawnOnRoadOnly     = false -- always spawn on road
+Config.CheckCycle          = 30 -- horse check system (mins) -- default 60
+Config.StarterHorseDieAge  = 7 -- starter horse age in days till it dies (days)
+Config.HorseDieAge         = 665 -- horse age in days till it dies (days)
+Config.StoreFleedHorse     = false -- store horse if flee is used
+Config.EnableServerNotify  = false
+Config.KeyBind             = 'J'
+Config.AllowTwoPlayersRide = true -- if true two players can ride but may have some impact on other features
+Config.DeathGracePeriod    = 60000 -- grace period to let player attempt to revive the horse
+Config.MoveHorseBasePrice  = 10
+Config.MoveFeePerMeter     = 0.01
+Config.SellPriceMultiplier = 0.5 -- stable buy-back price = horseprice * this
+Config.InteractDistance    = 2.5 -- max distance to feed / brush / revive / holster your horse
+
+---------------------------------
+-- horse inventory weight by level
+---------------------------------
+Config.Level1InvWeight = 4000
+Config.Level1InvSlots = 14
+Config.Level2InvWeight = 6000
+Config.Level2InvSlots = 16
+Config.Level3InvWeight = 8000
+Config.Level3InvSlots = 18
+Config.Level4InvWeight = 9000
+Config.Level4InvSlots = 20
+Config.Level5InvWeight = 10000
+Config.Level5InvSlots = 25
+Config.Level6InvWeight = 12000
+Config.Level6InvSlots = 26
+Config.Level7InvWeight = 13000
+Config.Level7InvSlots = 27
+Config.Level8InvWeight = 14000
+Config.Level8InvSlots = 28
+Config.Level9InvWeight = 15000
+Config.Level9InvSlots = 29
+Config.Level10InvWeight = 16000
+Config.Level10InvSlots = 30
+
+---------------------------------
+-- horse health/stamina/ability/speed/acceleration levels
+---------------------------------
+Config.Level1 = 100
+Config.Level2 = 200
+Config.Level3 = 300
+Config.Level4 = 400
+Config.Level5 = 500
+Config.Level6 = 900
+Config.Level7 = 1000
+Config.Level8 = 1500
+Config.Level9 = 1750
+Config.Level10 = 2000
+
+---------------------------------
+-- player feed horse settings
+---------------------------------
+Config.HorseFeed = {
+    -- medicineHash is optional. If u do not set, the default value wil be: consumable_horse_stimulant
+    ['horsecarrot']    = { health = 10,  stamina = 10,  ismedicine = false },
+	['hay']    = { health = 10,  stamina = 10,  ismedicine = false },
+    ['horseapple']     = { health = 15,  stamina = 15,  ismedicine = false },
+    ['sugarcube']      = { health = 15,  stamina = 15,  ismedicine = false },
+    ['horse_stimulant'] = { health = 100, stamina = 100, ismedicine = true, medicineHash = 'consumable_horse_stimulant' },
+}
+
+---------------------------------
+-- horse xp rewards for feeding / brushing
+-- per-item feed values + brush value are awarded by the server
+-- CooldownSeconds is per-horse (0 = disabled), MaxXp caps horsexp
+---------------------------------
+Config.HorseXp = {
+    CooldownSeconds = 60,
+    MaxXp = 2000,
+    Brush = 10,
+    Feed = {
+        ['horsecarrot'] = 5,
+        ['hay'] = 5,
+        ['horseapple'] = 10,
+        ['sugarcube'] = 10,
+        ['horse_stimulant'] = 15,
+    },
+}
+
+---------------------------------
+--horse action
+---------------------------------
+Config.ObjectAction = true
+
+Config.BoostAction = {
+    Health = math.random(3, 9),
+    Stamina = math.random(3, 9)
+}
+
+Config.ObjectActionList = {
+    [1] = {`p_watertrough02x`, 'drink'},
+    [2] = {`p_watertrough01x`, 'drink'},
+    [3] = {`p_haypile01x`, 'feed'},
+}
+
+Config.Anim = {
+    Drink  = { dict = 'amb_creature_mammal@world_horse_drink_ground@base', anim = 'base',   duration = 20 }, --duration in seconds
+    Drink2 = { dict = 'amb_creature_mammal@prop_horse_drink_trough@idle0', anim = 'idle_a', duration = 20 },
+    Graze  = { dict = 'amb_creature_mammal@world_horse_grazing@idle',      anim = 'idle_a', duration = 20 }
+}
+
+---------------------------------
+-- config blips
+---------------------------------
+Config.Blip = {
+    blipName = locale('cf_menu_horse_blip_name'), -- Config.Blip.blipName
+    blipSprite = 'blip_shop_horse', -- Config.Blip.blipSprite
+    blipScale = 0.1 -- Config.Blip.blipScale
+}
+
+---------------------------------
+-- stable npc settings
+---------------------------------
+Config.DistanceSpawn = 20.0
+Config.FadeIn = true
+
+---------------------------------
+-- stable npcs
+---------------------------------
+---------------------------------
+-- breeding settings
+---------------------------------
+Config.Breeding = {
+    enabled = true,
+    requiredJob = 'horsebreeder',
+    requireOppositeSex = true,
+    gestationMinutes = 120,
+    breedCooldownMinutes = 120, -- 2 hours
+    hayCost = 1,
+    maturityMinutes = 60,
+}
+
+---------------------------------
+-- growth / foal settings
+---------------------------------
+Config.Growth = {
+    enabled = true,
+    minScale = 0.4,
+    growthMinutesToAdult = 720, --- 12 hours
+}
+
+---------------------------------
+-- all horse models for random foal breed
+---------------------------------
+Config.HorseModels = {
+    'a_c_horse_americanpaint_greyovero',
+    'a_c_horse_americanpaint_overo',
+    'a_c_horse_americanpaint_splashedwhite',
+    'a_c_horse_americanpaint_tobiano',
+    'a_c_horse_americanstandardbred_black',
+    'a_c_horse_americanstandardbred_buckskin',
+    'a_c_horse_americanstandardbred_lightbuckskin',
+    'a_c_horse_americanstandardbred_palominodapple',
+    'a_c_horse_americanstandardbred_silvertailbuckskin',
+    'a_c_horse_andalusian_darkbay',
+    'a_c_horse_andalusian_perlino',
+    'a_c_horse_andalusian_rosegray',
+    'a_c_horse_appaloosa_blanket',
+    'a_c_horse_appaloosa_blacksnowflake',
+    'a_c_horse_appaloosa_brownleopard',
+    'a_c_horse_appaloosa_fewspotted_pc',
+    'a_c_horse_appaloosa_leopard',
+    'a_c_horse_appaloosa_leopardblanket',
+    'a_c_horse_arabian_black',
+    'a_c_horse_arabian_grey',
+    'a_c_horse_arabian_redchestnut',
+    'a_c_horse_arabian_rosegreybay',
+    'a_c_horse_arabian_warpedbrindle_pc',
+    'a_c_horse_arabian_white',
+    'a_c_horse_ardennes_bayroan',
+    'a_c_horse_ardennes_irongreyroan',
+    'a_c_horse_ardennes_strawberryroan',
+    'a_c_horse_belgian_blondchestnut',
+    'a_c_horse_belgian_mealychestnut',
+    'a_c_horse_breton_grullodun',
+    'a_c_horse_breton_mealydapplebay',
+    'a_c_horse_breton_redroan',
+    'a_c_horse_breton_sealbrown',
+    'a_c_horse_breton_sorrel',
+    'a_c_horse_breton_steelgrey',
+    'a_c_horse_criollo_baybrindle',
+    'a_c_horse_criollo_bayframeovero',
+    'a_c_horse_criollo_blueroanovero',
+    'a_c_horse_criollo_dun',
+    'a_c_horse_criollo_marblesabino',
+    'a_c_horse_criollo_sorrelovero',
+    'a_c_horse_dutchwarmblood_chocolateroan',
+    'a_c_horse_dutchwarmblood_sealbrown',
+    'a_c_horse_dutchwarmblood_sootybuckskin',
+    'a_c_horse_gypsycob_skewbald',
+    'a_c_horse_gypsycob_splashedpiebald',
+    'a_c_horse_gypsycob_whiteblagdon',
+    'a_c_horse_hungarianhalfbred_darkdapplegrey',
+    'a_c_horse_hungarianhalfbred_flaxenchestnut',
+    'a_c_horse_hungarianhalfbred_liverchestnut',
+    'a_c_horse_hungarianhalfbred_piebaldtobiano',
+    'a_c_horse_kentuckysaddle_black',
+    'a_c_horse_kentuckysaddle_buttermilkbuckskin_pc',
+    'a_c_horse_kentuckysaddle_chestnutpinto',
+    'a_c_horse_kentuckysaddle_grey',
+    'a_c_horse_kentuckysaddle_silverbay',
+    'a_c_horse_kladruber_black',
+    'a_c_horse_kladruber_cremello',
+    'a_c_horse_kladruber_dapplerosegrey',
+    'a_c_horse_kladruber_grey',
+    'a_c_horse_kladruber_silver',
+    'a_c_horse_kladruber_white',
+    'a_c_horse_missourifoxtrotter_amberchampagne',
+    'a_c_horse_missourifoxtrotter_buckskinbrindle',
+    'a_c_horse_missourifoxtrotter_dapplegrey',
+    'a_c_horse_missourifoxtrotter_sablechampagne',
+    'a_c_horse_missourifoxtrotter_silverdapplepinto',
+    'a_c_horse_morgan_bay',
+    'a_c_horse_morgan_bayroan',
+    'a_c_horse_morgan_flaxenchestnut',
+    'a_c_horse_morgan_liverchestnut_pc',
+    'a_c_horse_morgan_palomino',
+    'a_c_horse_mustang_goldendun',
+    'a_c_horse_mustang_grullodun',
+    'a_c_horse_mustang_reddunovero',
+    'a_c_horse_mustang_tigerstripedbay',
+    'a_c_horse_mustang_wildbay',
+    'a_c_horse_nokota_blueroan',
+    'a_c_horse_nokota_reversedappleroan',
+    'a_c_horse_nokota_whiteroan',
+    'a_c_horse_norfolkroadster_piebaldroan',
+    'a_c_horse_norfolkroadster_speckledgrey',
+    'a_c_horse_norfolkroadster_spottedtricolor',
+    'a_c_horse_shire_darkbay',
+    'a_c_horse_shire_lightgrey',
+    'a_c_horse_shire_ravenblack',
+    'a_c_horse_suffolkpunch_redchestnut',
+    'a_c_horse_suffolkpunch_sorrel',
+    'a_c_horse_tennesseewalker_blackrabicano',
+    'a_c_horse_tennesseewalker_chestnut',
+    'a_c_horse_tennesseewalker_dapplebay',
+    'a_c_horse_tennesseewalker_flaxenroan',
+    'a_c_horse_tennesseewalker_goldpalomino_pc',
+    'a_c_horse_tennesseewalker_mahoganybay',
+    'a_c_horse_tennesseewalker_redroan',
+    'a_c_horse_thoroughbred_blackchestnut',
+    'a_c_horse_thoroughbred_bloodbay',
+    'a_c_horse_thoroughbred_brindle',
+    'a_c_horse_thoroughbred_dapplegrey',
+    'a_c_horse_thoroughbred_reversedappleblack',
+    'a_c_horse_turkoman_darkbay',
+    'a_c_horse_turkoman_gold',
+    'a_c_horse_turkoman_silver',
+}
+
+Config.StableSettings = {
+
+    {   -- colter
+        stableid = 'colter',
+        coords = vector3(-1334.2, 2397.41, 307.21),
+        npcmodel = `u_m_m_bwmstablehand_01`,
+        npccoords = vector4(-1334.2, 2397.41, 307.21, 67.43),
+        horsecustom = vec4(-1344.8345, 2392.2900, 306.7908, 153.3136),
+        showblip = true
+    },
+
+    {   -- vanhorn
+        stableid = 'vanhorn',
+        coords = vector3(2968.86, 792.97, 51.4),
+        npcmodel = `u_m_m_bwmstablehand_01`,
+        npccoords = vector4(2968.86, 792.97, 51.4, 357.89),
+        horsecustom = vec4(2970.4155, 785.6143, 51.3995, 137.7870),
+        showblip = true
+    },
+
+    {   -- saintdenis
+        stableid = 'saintdenis',
+        coords = vector3(2512.28, -1457.33, 46.31),
+        npcmodel = `u_m_m_bwmstablehand_01`,
+        npccoords = vector4(2512.28, -1457.33, 46.31, 86.43),
+        horsecustom = vec4(2502.7288, -1439.7654, 46.3141, 176.4436),
+        showblip = true
+    },
+
+    {   -- rhodes
+        stableid = 'rhodes',
+        coords = vector3(1211.55, -190.84, 101.39),
+        npcmodel = `u_m_m_bwmstablehand_01`,
+        npccoords = vector4(1211.55, -190.84, 101.39, 100.22),
+        horsecustom = vec4(1215.1134, -207.5254, 101.0958, 267.8741),
+        showblip = true
+    },
+
+    {   -- valentine
+        stableid = 'valentine',
+        coords = vector3(-365.2, 791.94, 116.18),
+        npcmodel = `u_m_m_bwmstablehand_01`,
+        npccoords = vector4(-365.2, 791.94, 116.18, 180.9),
+        horsecustom = vec4(-388.5212, 784.0562, 115.8154, 150.4135),
+        horsePreview = vec4(-357.77, 771.73, 116.52, 5.00),
+        horseCameraPreview = vec4(-357.77, 764.73, 118.52, 5.00),
+        showblip = true
+    },
+
+    {   -- strawberry
+        stableid = 'strawberry',
+        coords = vector3(-1817.1, -568.64, 155.98),
+        npcmodel = `u_m_m_bwmstablehand_01`,
+        npccoords = vector4(-1817.1, -568.64, 155.98, 254.85),
+        horsecustom = vec4(-1827.2969, -577.0493, 155.9565, 215.5404),
+        showblip = true
+    },
+
+    {   -- blackwater
+        stableid = 'blackwater',
+        coords = vector3(-876.85, -1365.55, 43.53),
+        npcmodel = `u_m_m_bwmstablehand_01`,
+        npccoords = vector4(-876.85, -1365.55, 43.53, 275.38),
+        horsecustom = vec4(-865.1928, -1366.3270, 43.5440, 86.8795),
+        showblip = true
+    },
+
+    {   -- tumbleweed
+        stableid = 'tumbleweed',
+        coords = vector3(-5514.81, -3040.25, -2.39),
+        npcmodel = `u_m_m_bwmstablehand_01`,
+        npccoords = vector4(-5514.81, -3040.25, -2.39, 175.22),
+        horsecustom = vec4(-5526.3452, -3030.7842, -2.0329, 105.3392),
+        showblip = true
+    },
+
+    {   -- emerald ranch
+        stableid = 'emeraldranch',
+        coords = vector3(1393.46, 353.09, 87.63),
+        npcmodel = `mp_de_u_f_m_doverhill_01`,
+        npccoords = vector4(1393.90, 354.29, 87.66, 151.53),
+        horsecustom = vec4(1396.73, 345.73, 87.58, 58.91),
+        showblip = true
+    },
+
+}
+----------------------------------
+-- discord webhook logging
+----------------------------------
+Config.Webhooks = {
+    Enabled = true, -- master on/off switch
+    BotName = 'RSG Horses',
+    BotAvatar = '', -- optional image URL, leave blank string if none
+    URLs = {
+        economy  = '', -- horse purchases, sales, stabling, shop purchases, weapon store/retrieve, wild horse rewards
+        horses   = '', -- feeding, brushing, reviving, customization/coat/component changes, horse death, horse move
+        security = '', -- rejected/invalid/exploit-attempt events (clamped rewards, invalid quantities, failed validations, cooldown hits)
+        general  = '', -- fallback / resource start-stop / anything uncategorized
+    },
+}

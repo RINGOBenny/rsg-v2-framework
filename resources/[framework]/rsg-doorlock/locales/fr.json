@@ -1,0 +1,8 @@
+{
+    "sv_nokey": "Vous n'avez pas de clé!",
+
+    "cl_use_door": "Utiliser",
+    "cl_door_status_base": "État de la porte:",
+    "cl_door_status_lock": "Verrouillée",
+    "cl_door_status_unlock": "Déverrouillée"
+}

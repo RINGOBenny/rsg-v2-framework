@@ -1,0 +1,1 @@
+-- Disabled: this v2 build must not compare itself against the v3 versions on rsg-versioncheckers.
